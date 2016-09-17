@@ -1,6 +1,7 @@
 import routes = require('./routes');
-import Car = require('./Car');
-import ClownCar from './ClownCar';
+//import Car = require('./Car');
+import ClownCar = require('./ClownCar');
+import Car from './Car';
 
 const foo: string = 'bar';
 

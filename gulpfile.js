@@ -22,11 +22,17 @@ const sourcemaps = require('gulp-sourcemaps');
 const inject = require('gulp-inject');
 const istanbul = require('gulp-istanbul');
 const nodemon = require('gulp-nodemon');
-
+const Cache = require('gulp-file-cache')
 const tsProject = ts.createProject('tsconfig.json');
 
+const cache = new Cache();
 
-
+/*
+.pipe(cache.filter()) // remember files 
+                   .pipe(babel({ ... })) // compile new ones 
+                   .pipe(cache.cache()) // cache them 
+                   
+*/
 const config = {
   allJs: 'src/**/*.js',
   allTypeScript: 'src/**/*.ts',
@@ -95,17 +101,16 @@ gulp.task('default', ['build', 'watch']);
 
 
 //TODO: watch only server code.
-
-gulp.task('dev', ['clean', 'compile'], function () {
-  gulp.start('start');
-});
+gulp.task('dev', ['clean', 'compile', 'start']);
 
 gulp.task('start', function () {
-  nodemon({
-    script: 'build/app.js', // run ES5 code 
-    watch: 'src/**.*', // watch ES2015 code 
-    tasks: ['compile'] // compile synchronously onChange 
-  });
+  setTimeout(() => {
+    nodemon({
+      script: 'build/app.js', // run ES5 code 
+      watch: 'src/**.*', // watch ES2015 code 
+      tasks: ['compile'] // compile synchronously onChange 
+    });
+  }, 1000);
 });
 
 /**

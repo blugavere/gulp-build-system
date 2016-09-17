@@ -4,8 +4,9 @@ class Wheel {
   }
 
   spin() {
-    console.log("spinzz!");
+    console.log('spinzz');
   }
 
 }
-export default Wheel;
+//export default Wheel;
+export = Wheel;

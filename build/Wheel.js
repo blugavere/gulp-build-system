@@ -4,11 +4,10 @@ var Wheel = (function () {
         console.log('wheel!!@#@@');
     }
     Wheel.prototype.spin = function () {
-        console.log("spinzz!");
+        console.log('spinzz');
     };
     return Wheel;
 }());
-exports.__esModule = true;
-exports["default"] = Wheel;
+module.exports = Wheel;
 
 //# sourceMappingURL=Wheel.js.map

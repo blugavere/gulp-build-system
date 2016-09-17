@@ -1,5 +1,7 @@
-import Car = require('./Car');
-import Wheel from './Wheel';
+//import Car = require('./Car');
+import Car from './Car';
+//import Wheel from './Wheel';
+import Wheel = require('./Wheel');
 
 class ClownCar extends Car {
   private wheelz: Wheel;
@@ -12,4 +14,4 @@ class ClownCar extends Car {
   }
 }
 
-export default ClownCar;
+export = ClownCar;
