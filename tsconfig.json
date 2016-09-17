@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "noImplicitAny": false,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "outDir": "build",
+        "sourceMap": true,
+        "allowJs": true
+    },
+    "exclude": [
+        "node_modules",
+        "typings",
+        "wwwroot"
+    ]
+}

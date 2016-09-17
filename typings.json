@@ -1,0 +1,10 @@
+{
+  "name": "pouch-redux-middleware",
+  "dependencies": {},
+  "path": "tools/typings",
+  "bundle": "tools/typings/tsd.d.ts",
+  "globalDependencies": {
+    "node": "registry:dt/node#6.0.0+20160915134512",
+    "require": "registry:dt/require#2.1.20+20160316155526"
+  }
+}
