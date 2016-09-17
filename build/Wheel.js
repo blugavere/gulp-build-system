@@ -4,7 +4,7 @@ var Wheel = (function () {
         console.log('wheel!!@#@@');
     }
     Wheel.prototype.spin = function () {
-        console.log("spinzz!s");
+        console.log("spinzz!");
     };
     return Wheel;
 }());

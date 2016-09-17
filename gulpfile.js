@@ -21,6 +21,7 @@ const tslint = require('gulp-tslint');
 const sourcemaps = require('gulp-sourcemaps');
 const inject = require('gulp-inject');
 const istanbul = require('gulp-istanbul');
+const nodemon = require('gulp-nodemon');
 
 const tsProject = ts.createProject('tsconfig.json');
 
@@ -38,6 +39,7 @@ const config = {
 /**
  * watch task
  */
+//TODO: watch only client code.
 gulp.task('watch', function () {
   gulp.watch(config.allJs, ['js']);
   gulp.watch(config.allTypeScript, ['ts']);
@@ -87,12 +89,24 @@ gulp.task('js', function () {
 });
 
 gulp.task('ts', ['ts-lint', 'ts-compile']);
+gulp.task('compile', ['ts', 'js']);
 gulp.task('build', ['clean', 'ts', 'js']);
 gulp.task('default', ['build', 'watch']);
 
 
+//TODO: watch only server code.
 
+gulp.task('dev', ['clean', 'compile'], function () {
+  gulp.start('start');
+});
 
+gulp.task('start', function () {
+  nodemon({
+    script: 'build/app.js', // run ES5 code 
+    watch: 'src/**.*', // watch ES2015 code 
+    tasks: ['compile'] // compile synchronously onChange 
+  });
+});
 
 /**
  * Completed

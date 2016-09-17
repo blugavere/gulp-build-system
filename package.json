@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "dev": "gulp && npm run nodemon build/app.js",
+    "dev": "gulp dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -31,6 +31,7 @@
     "gulp-inject": "^1.5.0",
     "gulp-install": "^0.6.0",
     "gulp-istanbul": "^1.1.1",
+    "gulp-nodemon": "^2.1.0",
     "gulp-plumber": "^1.1.0",
     "gulp-print": "^2.0.1",
     "gulp-rimraf": "^0.1.1",

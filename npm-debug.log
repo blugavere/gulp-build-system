@@ -1,0 +1,48 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/benlugavere/.nvm/versions/node/v6.4.0/bin/node',
+1 verbose cli   '/Users/benlugavere/.nvm/versions/node/v6.4.0/bin/npm',
+1 verbose cli   'run',
+1 verbose cli   'dev' ]
+2 info using npm@3.10.3
+3 info using node@v6.4.0
+4 verbose run-script [ 'predev', 'dev', 'postdev' ]
+5 info lifecycle pouch-redux-middleware@1.0.0~predev: pouch-redux-middleware@1.0.0
+6 silly lifecycle pouch-redux-middleware@1.0.0~predev: no script for predev, continuing
+7 info lifecycle pouch-redux-middleware@1.0.0~dev: pouch-redux-middleware@1.0.0
+8 verbose lifecycle pouch-redux-middleware@1.0.0~dev: unsafe-perm in lifecycle true
+9 verbose lifecycle pouch-redux-middleware@1.0.0~dev: PATH: /Users/benlugavere/.nvm/versions/node/v6.4.0/lib/node_modules/npm/bin/node-gyp-bin:/Users/benlugavere/Desktop/Universal/ts-tooling/node_modules/.bin:/Users/benlugavere/.nvm/versions/node/v6.4.0/bin:/Users/benlugavere/.nvm/versions/node/v6.4.0/bin:/usr/local/bin:/usr/local/bin:/usr/local/share/npm/bin:$PATH:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet
+10 verbose lifecycle pouch-redux-middleware@1.0.0~dev: CWD: /Users/benlugavere/Desktop/Universal/ts-tooling
+11 silly lifecycle pouch-redux-middleware@1.0.0~dev: Args: [ '-c', 'gulp dev' ]
+12 silly lifecycle pouch-redux-middleware@1.0.0~dev: Returned: code: 1  signal: null
+13 info lifecycle pouch-redux-middleware@1.0.0~dev: Failed to exec dev script
+14 verbose stack Error: pouch-redux-middleware@1.0.0 dev: `gulp dev`
+14 verbose stack Exit status 1
+14 verbose stack     at EventEmitter.<anonymous> (/Users/benlugavere/.nvm/versions/node/v6.4.0/lib/node_modules/npm/lib/utils/lifecycle.js:242:16)
+14 verbose stack     at emitTwo (events.js:106:13)
+14 verbose stack     at EventEmitter.emit (events.js:191:7)
+14 verbose stack     at ChildProcess.<anonymous> (/Users/benlugavere/.nvm/versions/node/v6.4.0/lib/node_modules/npm/lib/utils/spawn.js:40:14)
+14 verbose stack     at emitTwo (events.js:106:13)
+14 verbose stack     at ChildProcess.emit (events.js:191:7)
+14 verbose stack     at maybeClose (internal/child_process.js:852:16)
+14 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:215:5)
+15 verbose pkgid pouch-redux-middleware@1.0.0
+16 verbose cwd /Users/benlugavere/Desktop/Universal/ts-tooling
+17 error Darwin 15.6.0
+18 error argv "/Users/benlugavere/.nvm/versions/node/v6.4.0/bin/node" "/Users/benlugavere/.nvm/versions/node/v6.4.0/bin/npm" "run" "dev"
+19 error node v6.4.0
+20 error npm  v3.10.3
+21 error code ELIFECYCLE
+22 error pouch-redux-middleware@1.0.0 dev: `gulp dev`
+22 error Exit status 1
+23 error Failed at the pouch-redux-middleware@1.0.0 dev script 'gulp dev'.
+23 error Make sure you have the latest version of node.js and npm installed.
+23 error If you do, this is most likely a problem with the pouch-redux-middleware package,
+23 error not with npm itself.
+23 error Tell the author that this fails on your system:
+23 error     gulp dev
+23 error You can get information on how to open an issue for this project with:
+23 error     npm bugs pouch-redux-middleware
+23 error Or if that isn't available, you can get their info via:
+23 error     npm owner ls pouch-redux-middleware
+23 error There is likely additional logging output above.
+24 verbose exit [ 1, true ]

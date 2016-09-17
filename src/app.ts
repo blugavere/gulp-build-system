@@ -2,8 +2,6 @@ import routes = require('./routes');
 import Car = require('./Car');
 import ClownCar from './ClownCar';
 
-//console.log(Car);
-
 const foo: string = 'bar';
 
 

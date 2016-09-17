@@ -4,7 +4,7 @@ class Wheel {
   }
 
   spin() {
-    console.log("spinzz!s");
+    console.log("spinzz!");
   }
 
 }
