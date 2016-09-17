@@ -1,10 +1,10 @@
 "use strict";
 var Wheel = (function () {
     function Wheel() {
-        console.log('wheel!!');
+        console.log('wheel!!@#@@');
     }
     Wheel.prototype.spin = function () {
-        console.log('spinzz!s');
+        console.log("spinzz!s");
     };
     return Wheel;
 }());

@@ -8,6 +8,7 @@ const path = require('path');
 const colors = require('colors');
 const del = require('del');
 const tslintConfig = require('./tslint');
+//const eslintConfig = require('./.eslintrc');
 
 const gulp = require('gulp');
 const babel = require('gulp-babel');
@@ -21,13 +22,9 @@ const sourcemaps = require('gulp-sourcemaps');
 const inject = require('gulp-inject');
 const istanbul = require('gulp-istanbul');
 
-
-//test
 const tsProject = ts.createProject('tsconfig.json');
 
-gulp.task('clean', function () {
-  console.log('TODO: CLEAN');
-});
+
 
 const config = {
   allJs: 'src/**/*.js',
@@ -77,21 +74,55 @@ gulp.task('ts-compile', function () {
 
 });
 
-gulp.task('js', function () {
-  console.log(babelConfig);
-  return gulp.src('src/**/*.js')
+/**
+ * Compile javascript through babel.
+ */
 
+gulp.task('js', function () {
+  return gulp.src('src/**/*.js')
+    .pipe(eslint())
+    .pipe(eslint.format())
     .pipe(babel(babelConfig))
     .pipe(gulp.dest('build'));
 });
-gulp.task('ts', ['ts-lint', 'ts-compile']);
 
+gulp.task('ts', ['ts-lint', 'ts-compile']);
 gulp.task('build', ['clean', 'ts', 'js']);
 gulp.task('default', ['build', 'watch']);
 
 
 
 
+
+/**
+ * Completed
+ */
+
+
+
+
+/**
+ * Lint all custom TypeScript files.
+ */
+gulp.task('ts-lint', function () {
+  return gulp.src(config.allTypeScript)
+    .pipe(tslint({
+      formatter: "verbose",
+      configuration: tslintConfig
+    })).pipe(tslint.report());
+});
+
+gulp.task('clean', function () {
+  return del.sync(['build/**']);
+});
+
+
+
+
+
+/**
+ * DEPRECATED
+ */
 
 
 /**
@@ -106,18 +137,5 @@ gulp.task('gen-ts-refs', function () {
     transform: function (filepath) {
       return '/// <reference path="../..' + filepath + '" />';
     }
-  })).pipe(gulp.dest(config.typings));
-});
-
-
-
-/**
- * Lint all custom TypeScript files.
- */
-gulp.task('ts-lint', function () {
-  return gulp.src(config.allTypeScript)
-    .pipe(tslint({
-      formatter: "verbose",
-      configuration: tslintConfig
-    })).pipe(tslint.report());
+  })).pipe(gulp.dest(config.tsOutputPath));
 });

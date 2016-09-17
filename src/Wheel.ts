@@ -1,10 +1,10 @@
 class Wheel {
   constructor() {
-    console.log('wheel!!');
+    console.log('wheel!!@#@@');
   }
 
   spin() {
-    console.log('spinzz!s');
+    console.log("spinzz!s");
   }
 
 }
