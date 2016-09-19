@@ -39,7 +39,8 @@ const config = {
   libraryTypeScriptDefinitions: 'typings/**/*.d.ts',
   tsOutputPath: 'build',
   typings: './typings/',
-  defs: 'release/definitions'
+  defs: 'release/definitions',
+  serverMain: 'build/server/app.js'
 }
 
 /**
@@ -87,10 +88,12 @@ gulp.task('ts-compile', function () {
  */
 
 gulp.task('js', function () {
-  return gulp.src('src/**/*.js')
+  return gulp.src(config.allJs)
+    //.pipe(cache.filter())
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(babel(babelConfig))
+    //.pipe(cache.cache())
     .pipe(gulp.dest('build'));
 });
 
@@ -106,7 +109,7 @@ gulp.task('dev', ['clean', 'compile', 'start']);
 gulp.task('start', function () {
   setTimeout(() => {
     nodemon({
-      script: 'build/app.js', // run ES5 code 
+      script: config.serverMain, // run ES5 code 
       watch: 'src/**.*', // watch ES2015 code 
       tasks: ['compile'] // compile synchronously onChange 
     });

@@ -1,6 +1,6 @@
 class Horn {
   constructor(){
-    console.log('honk');
+    console.log('honk'); //eslint-ignore
   }
 }
 

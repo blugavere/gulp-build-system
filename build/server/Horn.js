@@ -9,7 +9,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Horn = function Horn() {
   _classCallCheck(this, Horn);
 
-  console.log('honk');
+  console.log('honk'); //eslint-ignore
 };
 
 exports.default = Horn;
