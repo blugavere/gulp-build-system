@@ -4,6 +4,7 @@ This is a starter pack for getting up and running quickly with a hybrid typescri
 
 ### TODOS ###
 * Implement dependency injection for gulp decoration
+* Build out sample client-side application
 * Integrate instanbul for code-coverage reports and TDD
 * Separate out server-build/watch process from client build/watch process so that server doesn't recompile on client changes (and visa versa)
 * Create deployment process whereby dist folder is populated with server-side compiled code and client folder is populated with bundled minified production ready code.
