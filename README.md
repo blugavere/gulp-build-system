@@ -3,6 +3,7 @@
 This is a starter pack for getting up and running quickly with a hybrid typescript and es2017 node.js application. The intent of this repository is to create portable code that can help ease the migration from purely javascript to a hybrid application, and then eventually fully typescript if you so choose.
 
 ### TODOS ###
+* Implement file cache for faster compilation
 * Implement dependency injection for gulp decoration
 * Build out sample client-side application
 * Implement isomorphic react/redux
