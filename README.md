@@ -1,29 +1,14 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+This is a starter pack for getting up and running quickly with a hybrid typescript and es2017 node.js application. The intent of this repository is to create portable code that can help ease the migration from purely javascript to a hybrid application, and then eventually fully typescript if they so choose.
 
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+### TODOS ###
+* Integrate instanbul for code-coverage reports and TDD
+* Separate out server-build/watch process from client build/watch process so that server doesn't recompile on client changes (and visa versa)
+* Create deployment process whereby dist folder is populated with server-side compiled code and client folder is populated with bundled minified production ready code.
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+* npm i
+* typings i
+* npm run dev
