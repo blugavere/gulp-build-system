@@ -1,12 +1,12 @@
 class Wheel {
   constructor() {
-    console.log('wheel!!@#@@');
+    console.log('typesript class - wheel constructor'); // eslint-disable-line
   }
 
   spin() {
-    console.log('spinzz');
+    console.log('typesript class - wheel method'); // eslint-disable-line
   }
 
 }
-//export default Wheel;
+
 export = Wheel;

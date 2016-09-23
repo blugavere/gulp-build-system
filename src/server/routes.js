@@ -1,10 +1,8 @@
-//const Horn = require('./Horn').default;
 import Horn from './Horn';
 
 const register = () => {
-  console.log('route!!');
-  const horn = new Horn();
-  
+  console.log('todo: express routing');  // eslint-disable-line
+  const horn = new Horn();  // eslint-disable-line
 };
 
 module.exports = register;
