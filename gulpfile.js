@@ -89,6 +89,7 @@ gulp.task('ts-compile', function () {
 
 gulp.task('js', function () {
   return gulp.src(config.allJs)
+    .pipe(print())
     //.pipe(cache.filter())
     .pipe(eslint())
     .pipe(eslint.format())
@@ -104,24 +105,18 @@ gulp.task('default', ['build', 'watch']);
 
 
 //TODO: watch only server code.
-gulp.task('dev', ['clean', 'compile', 'start']);
-
-gulp.task('start', function () {
-  setTimeout(() => {
-    nodemon({
-      script: config.serverMain, // run ES5 code 
-      watch: 'src/**.*', // watch ES2015 code 
-      tasks: ['compile'] // compile synchronously onChange 
-    });
-  }, 1000);
+gulp.task('dev', ['clean', 'compile'], () => { // 'start'
+  nodemon({
+    script: config.serverMain, // run ES5 code 
+    watch: 'src/server/**.*', // watch ES2015 code 
+    tasks: ['compile'] // compile synchronously onChange 
+  });
 });
+
 
 /**
  * Completed
  */
-
-
-
 
 /**
  * Lint all custom TypeScript files.
@@ -160,4 +155,15 @@ gulp.task('gen-ts-refs', function () {
       return '/// <reference path="../..' + filepath + '" />';
     }
   })).pipe(gulp.dest(config.tsOutputPath));
+});
+
+//DEPRECATED in favor of sync completion above
+gulp.task('start', function () {
+  setTimeout(() => {
+    nodemon({
+      script: config.serverMain, // run ES5 code 
+      watch: 'src/server/**.*', // watch ES2015 code 
+      tasks: ['compile'] // compile synchronously onChange 
+    });
+  }, 1000);
 });

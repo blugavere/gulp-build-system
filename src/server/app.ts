@@ -6,10 +6,8 @@ import Car from './Car';
 const foo: string = 'bar';
 
 
-const myCar = new Car('blue');
-const car = new ClownCar('red');
-
-//const otherCar = new Car('red');
+const car = new Car('blue');
+const clownCar = new ClownCar('red');
 
 console.log('hello world');
 
