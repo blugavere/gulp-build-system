@@ -24,7 +24,7 @@ const tsProject = ts.createProject('tsconfig.json');
 class GulpConfig {
   constructor(gulp) {
     this.gulp = gulp;
-    this.babelConfig = JSON.parse(fs.readFileSync('../.babelrc'));
+    this.babelConfig = JSON.parse(fs.readFileSync('./.babelrc'));
     this.tslintConfig = require('../tslint');
 
     this.babel = this.babel.bind(this);
@@ -100,11 +100,9 @@ class GulpConfig {
     gulp.task(`${prefix}js`, function () {
       return gulp.src(_config.allJs)
         .pipe(print())
-        //.pipe(cache.filter())
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(babel(babelConfig))
-        //.pipe(cache.cache())
         .pipe(gulp.dest('build'));
     });
 
@@ -114,7 +112,7 @@ class GulpConfig {
     gulp.task(`${prefix}build`, [`${prefix}clean`, `${prefix}ts`, jsTask]);
 
     //TODO: watch only server code.
-    gulp.task(`${prefix}dev`, [`${prefix}clean`, `${prefix}compile`], () => { // 'start'
+    gulp.task('dev', [`${prefix}clean`, `${prefix}compile`], () => { // 'start'
       nodemon({
         script: _config.serverMain, // run ES5 code 
         watch: 'src/server/**.*', // watch ES2015 code 
