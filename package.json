@@ -1,8 +1,8 @@
 {
-  "name": "pouch-redux-middleware",
+  "name": "gulpconfig",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "dist/GulpConfig.js",
   "scripts": {
     "dev": "gulp dev",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,6 +13,7 @@
   "devDependencies": {
     "babel-plugin-transform-class-properties": "^6.11.5",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-object-assign": "^6.8.0",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
     "babel-polyfill": "^6.13.0",
     "babel-preset-es2015": "^6.14.0",
