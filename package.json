@@ -1,6 +1,6 @@
 {
   "name": "gulp-build-system",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This doesn't work yet.",
   "main": "dist/GulpConfig.js",
   "scripts": {
