@@ -38,8 +38,11 @@ gulpConfig.initialize();
 * assumption is that your code is in the below structure: 
 * src/
 *   server/
+*     app.js
 *   client/
-* 
+* .gitignore (required)
+* .gulpfile.js
+* .package.json
 * the below code is not required if you follow this convention.
 */
 gulpConfig.config({ allJs: 'src/**/*.js', allTs: 'src/**/*.ts')

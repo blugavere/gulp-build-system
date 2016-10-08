@@ -27,6 +27,7 @@ const nsp = require('gulp-nsp');
 class GulpConfig {
   constructor(gulp) {
     this.gulp = gulp;
+    this.eslintConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.eslintrc')));
     this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
     this.tslintConfig = require('../tslint');
 
@@ -61,10 +62,14 @@ class GulpConfig {
   tslint(config) {
     this.tslintConfig = config;
   }
+  
+  eslint(config) {
+    this.eslintConfig = config;
+  }
 
   initialize() {
     //const self = this;
-    const { _config, _config: { prefix }, babelConfig, gulp, tslintConfig } = this;
+    const { _config, _config: { prefix }, babelConfig, eslintConfig, gulp, tslintConfig } = this;
 
     /**
      * testing
@@ -111,7 +116,7 @@ class GulpConfig {
     const buildDist = `${prefix}build:dist`;
     gulp.task(buildDist, [`${prefix}clean:dist`, `${prefix}build`], function () {
       return gulp.src(`${_config.outputPath}/**/*.js`)
-        .pipe(babel())
+        .pipe(babel(babelConfig))
         .pipe(gulp.dest(_config.deployPath));
     });
 
@@ -168,7 +173,7 @@ class GulpConfig {
       return gulp.src(_config.allJs)
         .pipe(excludeGitignore())
         .pipe(print())
-        .pipe(eslint())
+        .pipe(eslint(eslintConfig))
         .pipe(eslint.format())
         .pipe(babel(babelConfig))
         .pipe(gulp.dest(_config.outputPath));
