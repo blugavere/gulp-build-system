@@ -7,7 +7,6 @@ const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
 const sourcemaps = require('gulp-sourcemaps');
 const nodemon = require('gulp-nodemon');
-const tsProject = ts.createProject('tsconfig.json');
 const excludeGitignore = require('gulp-exclude-gitignore');
 const plumber = require('gulp-plumber');
 const mocha = require('gulp-mocha');
@@ -17,6 +16,7 @@ const path = require('path');
 const appRoot = require('app-root-path');
 const coveralls = require('gulp-coveralls');
 
+const tsProject = ts.createProject(path.join(__dirname, '../tsconfig.json'));
 const nsp = require('gulp-nsp');
 //const eslintConfig = require('./.eslintrc');
 //const install = require('gulp-install');
@@ -27,7 +27,7 @@ const nsp = require('gulp-nsp');
 class GulpConfig {
   constructor(gulp) {
     this.gulp = gulp;
-    this.babelConfig = JSON.parse(fs.readFileSync('./.babelrc'));
+    this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
     this.tslintConfig = require('../tslint');
 
     this.babel = this.babel.bind(this);
