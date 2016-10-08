@@ -18,3 +18,22 @@ $ npm i
 $ typings i
 $ npm run dev
 ```
+### Installation ###
+
+```js
+
+$ npm i --save-dev gulp-build-config
+
+```
+
+### Usage ###
+
+```js
+
+const gulp = require('gulp');
+
+const GulpConfig = require('./src/gulpConfig');
+const gulpConfig = new GulpConfig(gulp);
+gulpConfig.initialize();
+
+```

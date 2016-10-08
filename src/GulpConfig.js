@@ -8,13 +8,15 @@ const tslint = require('gulp-tslint');
 const sourcemaps = require('gulp-sourcemaps');
 const nodemon = require('gulp-nodemon');
 const tsProject = ts.createProject('tsconfig.json');
-
+const excludeGitignore = require('gulp-exclude-gitignore');
 //require('babel-register')(babelConfig);
 //require('babel-polyfill');
 //const install = require('gulp-install');
-//const plumber = require('gulp-plumber');
+const plumber = require('gulp-plumber');
+const mocha = require('gulp-mocha');
 //const inject = require('gulp-inject');
-//const istanbul = require('gulp-istanbul');
+const istanbul = require('gulp-istanbul');
+const isparta = require('isparta');
 //const Cache = require('gulp-file-cache');
 //const path = require('path');
 //const colors = require('colors');
@@ -33,13 +35,14 @@ class GulpConfig {
     this.tslint = this.tslint.bind(this);
 
     this._config = {
+      prefix: 'gulpconfig:',
       allJs: 'src/**/*.js',
       allTypeScript: 'src/**/*.ts',
       libraryTypeScriptDefinitions: 'typings/**/*.d.ts',
-      tsOutputPath: 'build',
+      outputPath: 'lib',
       typings: './typings/',
       defs: 'release/definitions',
-      serverMain: 'build/server/app.js'
+      serverMain: '/server/app.js'
     };
 
   }
@@ -56,12 +59,41 @@ class GulpConfig {
     this.tslintConfig = config;
   }
 
-
-
   initialize() {
     //const self = this;
-    const { _config, babelConfig, gulp, tslintConfig } = this;
-    const prefix = 'gulpconfig:';
+    const { _config, _config: { prefix }, babelConfig, gulp, tslintConfig } = this;
+
+    /**
+     * testing
+     */
+    gulp.task('pre-test', function () {
+      return gulp.src([
+        'src/**/*.js',
+        '!src/**/*.test.js'
+      ]
+        )
+        .pipe(excludeGitignore())
+        .pipe(istanbul({
+          includeUntested: true,
+          instrumenter: isparta.Instrumenter
+        }))
+        .pipe(istanbul.hookRequire());
+    });
+
+    gulp.task('test', ['pre-test'], function (cb) {
+      var mochaErr;
+
+      gulp.src('src/**/*.test.js')
+        .pipe(plumber())
+        .pipe(mocha({reporter: 'spec'}))
+        .on('error', function (err) {
+          mochaErr = err;
+        })
+        .pipe(istanbul.writeReports())
+        .on('end', function () {
+          cb(mochaErr);
+        });
+    });
 
     /**
      * watch task
@@ -83,13 +115,14 @@ class GulpConfig {
       ];
 
       const tsResult = gulp.src(sourceTsFiles)
+        .pipe(excludeGitignore())
         .pipe(sourcemaps.init())
         .pipe(ts(tsProject));
 
-      tsResult.dts.pipe(gulp.dest(_config.tsOutputPath));
+      tsResult.dts.pipe(gulp.dest(_config.outputPath));
 
       return tsResult.js.pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(_config.tsOutputPath));
+        .pipe(gulp.dest(_config.outputPath));
 
     });
 
@@ -99,11 +132,12 @@ class GulpConfig {
     const jsTask = `${prefix}js`;
     gulp.task(`${prefix}js`, function () {
       return gulp.src(_config.allJs)
+        .pipe(excludeGitignore())
         .pipe(print())
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(babel(babelConfig))
-        .pipe(gulp.dest('build'));
+        .pipe(gulp.dest(_config.outputPath));
     });
 
 
@@ -114,7 +148,7 @@ class GulpConfig {
     //TODO: watch only server code.
     gulp.task('dev', [`${prefix}clean`, `${prefix}compile`], () => { // 'start'
       nodemon({
-        script: _config.serverMain, // run ES5 code 
+        script: `${_config.outputPath}${_config.serverMain}`, // run ES5 code 
         watch: 'src/server/**.*', // watch ES2015 code 
         tasks: [`${prefix}compile`] // compile synchronously onChange 
       });
@@ -135,8 +169,11 @@ class GulpConfig {
         })).pipe(tslint.report());
     });
 
+    /**
+     * deletes everything in the output path
+     */
     gulp.task(`${prefix}clean`, function () {
-      return del.sync(['build/**']);
+      return del.sync([`${_config.outputPath}/**`]);
     });
 
   }

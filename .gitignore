@@ -3,3 +3,5 @@ typings
 .gulp-cache
 build
 dist
+coverage
+lib
