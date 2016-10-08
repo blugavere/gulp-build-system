@@ -53,8 +53,9 @@ $ npm run dev
 $ gulp test
 
 //test watch
-gulp watch
+$ gulp watch
 
 //deploy to npm (be careful!)
-npm publish
+$ npm publish
+
 ```

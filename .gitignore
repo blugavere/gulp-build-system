@@ -2,6 +2,6 @@ node_modules
 typings
 .gulp-cache
 build
-dist
+dist/server
 coverage
 lib
