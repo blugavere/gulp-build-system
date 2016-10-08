@@ -45,7 +45,7 @@ class GulpConfig {
       typings: './typings/',
       defs: 'release/definitions',
       serverMain: '/server/app.js',
-      
+      serverWatch: '/server/**.*'
     };
     this._config.appRoot = appRoot.path;
   }
@@ -108,7 +108,8 @@ class GulpConfig {
     /**
      * deployment
      */
-    gulp.task(`${prefix}build:dist`, [`${prefix}clean:dist`, `${prefix}build`], function () {
+    const buildDist = `${prefix}build:dist`;
+    gulp.task(buildDist, [`${prefix}clean:dist`, `${prefix}build`], function () {
       return gulp.src(`${_config.outputPath}/**/*.js`)
         .pipe(babel())
         .pipe(gulp.dest(_config.deployPath));
@@ -125,7 +126,7 @@ class GulpConfig {
     /**
      * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
      */
-    gulp.task('prepublish', ['nsp', `${prefix}compile`]);
+    gulp.task('prepublish', ['nsp', buildDist]);
     gulp.task('default', [`${prefix}compile`, 'test', 'coveralls']);
 
     /**
@@ -163,7 +164,7 @@ class GulpConfig {
      * Compile javascript through babel.
      */
     const jsTask = `${prefix}js`;
-    gulp.task(`${prefix}js`, function () {
+    gulp.task(jsTask, function () {
       return gulp.src(_config.allJs)
         .pipe(excludeGitignore())
         .pipe(print())
@@ -173,17 +174,18 @@ class GulpConfig {
         .pipe(gulp.dest(_config.outputPath));
     });
 
-
-    gulp.task(`${prefix}ts`, [`${prefix}ts-lint`, `${prefix}ts-compile`]);
-    gulp.task(`${prefix}compile`, [`${prefix}ts`, jsTask]);
-    gulp.task(`${prefix}build`, [`${prefix}clean`, `${prefix}ts`, jsTask]);
+    const tsTask = `${prefix}ts`;
+    gulp.task(tsTask, [`${prefix}ts-lint`, `${prefix}ts-compile`]);
+    const compileTask = `${prefix}compile`;
+    gulp.task(compileTask, [tsTask, jsTask]);
+    gulp.task(`${prefix}build`, [`${prefix}clean`, tsTask, jsTask]);
 
     //TODO: watch only server code.
-    gulp.task('dev', [`${prefix}clean`, `${prefix}compile`], () => { // 'start'
+    gulp.task('dev', [`${prefix}clean`, compileTask], () => { // 'start'
       nodemon({
         script: `${_config.outputPath}${_config.serverMain}`, // run ES5 code 
         watch: 'src/server/**.*', // watch ES2015 code 
-        tasks: [`${prefix}compile`] // compile synchronously onChange 
+        tasks: [compileTask] // compile synchronously onChange 
       });
     });
 

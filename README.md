@@ -1,15 +1,12 @@
 # README #
 
-This is a starter pack for getting up and running quickly with a hybrid typescript and es2017 node.js application. The intent of this repository is to create portable code that can help ease the migration from purely javascript to a hybrid application, and then eventually fully typescript if you so choose.
+This is a pre-configured gulp setup for getting up and running quickly with either a new or existing typescript or es2017 node.js application (both are supported). 
+The intent of this repository is to either help quickly create a new application with a build process, or **install a build process** into an existing application with a simple NPM install and a few minor config changes, instead of having to write your own configs from scratch.
 
+This package has a ton of dependencies, but none of them will run in your production code.
 ### TODOS ###
 * Implement file cache for faster compilation
-* Implement dependency injection for gulp decoration
-* Build out sample client-side application
-* Implement isomorphic react/redux
-* Integrate instanbul for code-coverage reports and TDD
 * Separate out server-build/watch process from client build/watch process so that server doesn't recompile on client changes (and visa versa)
-* Create deployment process whereby dist folder is populated with server-side compiled code and client folder is populated with bundled minified production ready code.
 
 ### How do I get set up? ###
 
