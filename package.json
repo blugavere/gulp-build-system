@@ -23,7 +23,12 @@
     "url": "http://benlugavere.com/#/"
   },
   "files": [
-    "dist"
+    "dist",
+    ".babelrc",
+    ".eslintrc",
+    "nodemon.json",
+    "tsconfig.json",
+    "tslint.json"
   ],
   "license": "ISC",
   "devDependencies": {
