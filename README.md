@@ -10,7 +10,6 @@ See this link for more info. https://nodesecurity.io/advisories/118
 
 Install these by adding them to devDependencies in package.json and running $ npm i
 
-    "expect": "^1.20.2",
     "gulp": "^3.9.1",
     "gulp-istanbul": "^1.1.1",
     "gulp-nodemon": "^2.2.1",
@@ -59,7 +58,8 @@ gulpConfig.initialize();
 * .package.json
 * the below code is not required if you follow this convention.
 */
-gulpConfig.config({ allJs: 'src/**/*.js', allTs: 'src/**/*.ts')
+
+gulpConfig.config({ allJs: 'src/**/*.js', allTs: 'src/**/*.ts'});
 
 //add npm script --> "dev": "gulp dev"
 
