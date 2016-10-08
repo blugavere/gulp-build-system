@@ -35,7 +35,6 @@ var ts = require('gulp-typescript');
 var tslint = require('gulp-tslint');
 var sourcemaps = require('gulp-sourcemaps');
 var nodemon = require('gulp-nodemon');
-var tsProject = ts.createProject('tsconfig.json');
 var excludeGitignore = require('gulp-exclude-gitignore');
 var plumber = require('gulp-plumber');
 var mocha = require('gulp-mocha');
@@ -45,6 +44,7 @@ var path = require('path');
 var appRoot = require('app-root-path');
 var coveralls = require('gulp-coveralls');
 
+var tsProject = ts.createProject(path.join(__dirname, '../tsconfig.json'));
 var nsp = require('gulp-nsp');
 //const eslintConfig = require('./.eslintrc');
 //const install = require('gulp-install');
@@ -57,7 +57,7 @@ var GulpConfig = function () {
     _classCallCheck(this, GulpConfig);
 
     this.gulp = gulp;
-    this.babelConfig = JSON.parse(fs.readFileSync('./.babelrc'));
+    this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
     this.tslintConfig = require('../tslint');
 
     this.babel = this.babel.bind(this);
@@ -74,8 +74,8 @@ var GulpConfig = function () {
       deployPath: 'dist',
       typings: './typings/',
       defs: 'release/definitions',
-      serverMain: '/server/app.js'
-
+      serverMain: '/server/app.js',
+      serverWatch: '/server/**.*'
     };
     this._config.appRoot = appRoot.path;
   }
@@ -136,7 +136,8 @@ var GulpConfig = function () {
       /**
        * deployment
        */
-      gulp.task(prefix + 'build:dist', [prefix + 'clean:dist', prefix + 'build'], function () {
+      var buildDist = prefix + 'build:dist';
+      gulp.task(buildDist, [prefix + 'clean:dist', prefix + 'build'], function () {
         return gulp.src(_config.outputPath + '/**/*.js').pipe(babel()).pipe(gulp.dest(_config.deployPath));
       });
 
@@ -150,7 +151,7 @@ var GulpConfig = function () {
       /**
        * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
        */
-      gulp.task('prepublish', ['nsp', prefix + 'compile']);
+      gulp.task('prepublish', ['nsp', buildDist]);
       gulp.task('default', [prefix + 'compile', 'test', 'coveralls']);
 
       /**
@@ -180,21 +181,23 @@ var GulpConfig = function () {
        * Compile javascript through babel.
        */
       var jsTask = prefix + 'js';
-      gulp.task(prefix + 'js', function () {
+      gulp.task(jsTask, function () {
         return gulp.src(_config.allJs).pipe(excludeGitignore()).pipe(print()).pipe(eslint()).pipe(eslint.format()).pipe(babel(babelConfig)).pipe(gulp.dest(_config.outputPath));
       });
 
-      gulp.task(prefix + 'ts', [prefix + 'ts-lint', prefix + 'ts-compile']);
-      gulp.task(prefix + 'compile', [prefix + 'ts', jsTask]);
-      gulp.task(prefix + 'build', [prefix + 'clean', prefix + 'ts', jsTask]);
+      var tsTask = prefix + 'ts';
+      gulp.task(tsTask, [prefix + 'ts-lint', prefix + 'ts-compile']);
+      var compileTask = prefix + 'compile';
+      gulp.task(compileTask, [tsTask, jsTask]);
+      gulp.task(prefix + 'build', [prefix + 'clean', tsTask, jsTask]);
 
       //TODO: watch only server code.
-      gulp.task('dev', [prefix + 'clean', prefix + 'compile'], function () {
+      gulp.task('dev', [prefix + 'clean', compileTask], function () {
         // 'start'
         nodemon({
           script: '' + _config.outputPath + _config.serverMain, // run ES5 code 
           watch: 'src/server/**.*', // watch ES2015 code 
-          tasks: [prefix + 'compile'] // compile synchronously onChange 
+          tasks: [compileTask] // compile synchronously onChange 
         });
       });
 
