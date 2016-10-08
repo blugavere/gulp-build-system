@@ -57,6 +57,7 @@ var GulpConfig = function () {
     _classCallCheck(this, GulpConfig);
 
     this.gulp = gulp;
+    this.eslintConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.eslintrc')));
     this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
     this.tslintConfig = require('../tslint');
 
@@ -96,12 +97,18 @@ var GulpConfig = function () {
       this.tslintConfig = config;
     }
   }, {
+    key: 'eslint',
+    value: function eslint(config) {
+      this.eslintConfig = config;
+    }
+  }, {
     key: 'initialize',
     value: function initialize() {
       //const self = this;
       var _config = this._config;
       var prefix = this._config.prefix;
       var babelConfig = this.babelConfig;
+      var eslintConfig = this.eslintConfig;
       var gulp = this.gulp;
       var tslintConfig = this.tslintConfig;
 
@@ -138,7 +145,7 @@ var GulpConfig = function () {
        */
       var buildDist = prefix + 'build:dist';
       gulp.task(buildDist, [prefix + 'clean:dist', prefix + 'build'], function () {
-        return gulp.src(_config.outputPath + '/**/*.js').pipe(babel()).pipe(gulp.dest(_config.deployPath));
+        return gulp.src(_config.outputPath + '/**/*.js').pipe(babel(babelConfig)).pipe(gulp.dest(_config.deployPath));
       });
 
       gulp.task('coveralls', ['test'], function () {
@@ -182,7 +189,7 @@ var GulpConfig = function () {
        */
       var jsTask = prefix + 'js';
       gulp.task(jsTask, function () {
-        return gulp.src(_config.allJs).pipe(excludeGitignore()).pipe(print()).pipe(eslint()).pipe(eslint.format()).pipe(babel(babelConfig)).pipe(gulp.dest(_config.outputPath));
+        return gulp.src(_config.allJs).pipe(excludeGitignore()).pipe(print()).pipe(eslint(eslintConfig)).pipe(eslint.format()).pipe(babel(babelConfig)).pipe(gulp.dest(_config.outputPath));
       });
 
       var tsTask = prefix + 'ts';
