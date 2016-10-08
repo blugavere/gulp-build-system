@@ -2,7 +2,7 @@ node_modules
 typings
 .gulp-cache
 build
-dist/server
+dist
 coverage
 lib
 *.log ; ignore all anyfile.log 
