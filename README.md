@@ -30,10 +30,34 @@ $ npm i --save-dev gulp-build-config
 
 ```js
 
+// gulpfile.js
 const gulp = require('gulp');
 
 const GulpConfig = require('./src/gulpConfig');
 const gulpConfig = new GulpConfig(gulp);
 gulpConfig.initialize();
 
+/**
+* assumption is that your code is in the below structure: 
+* src/
+*   server/
+*   client/
+* 
+* the below code is not required if you follow this convention.
+*/
+gulpConfig.config({ allJs: 'src/**/*.js', allTs: 'src/**/*.ts')
+
+//add npm script --> "dev": "gulp dev"
+
+//run your code
+$ npm run dev
+
+//test 
+$ gulp test
+
+//test watch
+gulp watch
+
+//deploy to npm (be careful!)
+npm publish
 ```
