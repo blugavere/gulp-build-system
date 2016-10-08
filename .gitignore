@@ -5,3 +5,4 @@ build
 dist/server
 coverage
 lib
+*.log ; ignore all anyfile.log 

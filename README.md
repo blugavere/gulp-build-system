@@ -4,6 +4,18 @@ This is a pre-configured gulp setup for getting up and running quickly with eith
 The intent of this repository is to either help quickly create a new application with a build process, or **install a build process** into an existing application with a simple NPM install and a few minor config changes, instead of having to write your own configs from scratch.
 
 This package has a ton of dependencies, but none of them will run in your production code.
+
+Due to a security vulnerability, temporarily we need you to install some dev dependencies on your own (and of course at your own risk)
+See this link for more info. https://nodesecurity.io/advisories/118
+
+Install these by adding them to devDependencies in package.json and running $ npm i
+
+    "expect": "^1.20.2",
+    "gulp": "^3.9.1",
+    "gulp-istanbul": "^1.1.1",
+    "gulp-nodemon": "^2.2.1",
+    "gulp-exclude-gitignore": "^1.0.0"
+
 ### TODOS ###
 * Implement file cache for faster compilation
 * Separate out server-build/watch process from client build/watch process so that server doesn't recompile on client changes (and visa versa)
@@ -18,6 +30,8 @@ $ npm run dev
 ### Installation ###
 
 ```js
+
+//please read above!
 
 $ npm i --save-dev gulp-build-config
 

@@ -35,8 +35,9 @@
     "expect": "^1.20.2"
   },
   "dependencies": {
-    "gulp-mocha": "^3.0.1",
     "gulp": "^3.9.1",
+    
+    "gulp-mocha": "^3.0.1",
     "gulp-babel": "^6.1.2",
     "gulp-coveralls": "^0.1.0",
     "gulp-debug": "^2.1.2",
@@ -44,8 +45,8 @@
     "gulp-file-cache": "0.0.1",
     "gulp-inject": "^1.5.0",
     "gulp-install": "^0.6.0",
-    "gulp-istanbul": "^0.8.1",
-    "gulp-nodemon": "^2.1.0",
+    "gulp-istanbul": "^1.1.1",
+    "gulp-nodemon": "^2.2.1",
     "gulp-nsp": "^2.1.0",
     "gulp-plumber": "^1.0.0",
     "gulp-print": "^2.0.1",
