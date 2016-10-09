@@ -54,7 +54,8 @@ class GulpConfig {
     this.tasks = {
       jsTask: `${prefix}js`,
       tsTask: `${prefix}ts`,
-      otherTask: `${prefix}other` //move all non-ts and js files to lib
+      otherTask: `${prefix}other`, //move all non-ts and js files to lib,
+      buildDist: `${prefix}build:dist`
     };
 
     this._config.appRoot = appRoot.path;
@@ -122,8 +123,11 @@ class GulpConfig {
     /**
      * deployment
      */
-    const buildDist = `${prefix}build:dist`;
-    gulp.task(buildDist, [`${prefix}clean:dist`, `${prefix}build`], function () {
+    gulp.task(tasks.buildDist, [`${prefix}clean:dist`, `${prefix}build`], function () {
+
+      gulp.src(`${_config.outputPath}/**/!(*.js|*.ts|*.map|*.src)`)
+        .pipe(gulp.dest(_config.deployPath));
+
       return gulp.src(`${_config.outputPath}/**/*.js`)
         .pipe(babel(babelConfig))
         .pipe(gulp.dest(_config.deployPath));
@@ -140,7 +144,7 @@ class GulpConfig {
     /**
      * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
      */
-    gulp.task('prepublish', ['nsp', buildDist]);
+    gulp.task('prepublish', ['nsp', tasks.buildDist]);
     gulp.task('default', [`${prefix}compile`, 'test', 'coveralls']);
 
     /**
