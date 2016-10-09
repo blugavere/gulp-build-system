@@ -1,7 +1,7 @@
 const fs = require('fs');
 const del = require('del');
 const babel = require('gulp-babel');
-//const print = require('gulp-print');
+const print = require('gulp-print');
 const eslint = require('gulp-eslint');
 const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
@@ -15,7 +15,10 @@ const isparta = require('isparta');
 const path = require('path');
 const appRoot = require('app-root-path');
 const coveralls = require('gulp-coveralls');
-
+const gutil = require('gulp-util');
+//const webpack = require('gulp-webpack');
+//const webpack = require('webpack-stream');
+const webpack = require('webpack');
 const tsProject = ts.createProject(path.join(__dirname, '../tsconfig.json'));
 const nsp = require('gulp-nsp');
 //const eslintConfig = require('./.eslintrc');
@@ -29,6 +32,8 @@ class GulpConfig {
     this.gulp = gulp;
     this.eslintConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.eslintrc')));
     this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
+    this.webpackProdConfig = require('../webpack.config.prod')({}); //TODO: enable dynamic configs
+    
     this.tslintConfig = require('../tslint');
 
     this.babel = this.babel.bind(this);
@@ -46,6 +51,7 @@ class GulpConfig {
       deployPath: 'dist',
       typings: './typings/',
       defs: 'release/definitions',
+      clientMain: '/client/index',
       serverMain: '/server/app.js',
       serverWatch: '/server/**.*'
     };
@@ -79,7 +85,7 @@ class GulpConfig {
 
   initialize() {
     //const self = this;
-    const { _config, _config: { prefix }, babelConfig, eslintConfig, gulp, tasks, tslintConfig } = this;
+    const { _config, _config: { prefix }, babelConfig, eslintConfig, gulp, tasks, tslintConfig, webpackProdConfig } = this;
 
     /**
      * testing
@@ -123,14 +129,31 @@ class GulpConfig {
     /**
      * deployment
      */
-    gulp.task(tasks.buildDist, [`${prefix}clean:dist`, `${prefix}build`], function () {
+    gulp.task(tasks.buildDist, [`${prefix}clean:dist`, `${prefix}build`], function (cb) {
 
+      //move non-script assets
       gulp.src(`${_config.outputPath}/**/!(*.js|*.ts|*.map|*.src)`)
         .pipe(gulp.dest(_config.deployPath));
 
-      return gulp.src(`${_config.outputPath}/**/*.js`)
+    // run webpack
+        webpack(webpackProdConfig, function(err, stats) {
+            if(err) throw new gutil.PluginError('webpack', err);
+              gutil.log('[webpack', stats.toString({
+                  // output options
+              }));
+            //cb();
+        });
+
+      //compile client`${_config.outputPath}${_config.clientMain}`this.webpackProdConfig
+      /*gulp.src('lib/client/index.js')
+        .pipe(print())
+        .pipe(webpack(this.webpackProdConfig))
+        .pipe(gulp.dest('dist/client/'));*/
+
+      //compile server
+      return gulp.src(`${_config.outputPath}/server/**/*.js`)
         .pipe(babel(babelConfig))
-        .pipe(gulp.dest(_config.deployPath));
+        .pipe(gulp.dest(`${_config.deployPath}/server`));
     });
 
     gulp.task('coveralls', ['test'], function () {
