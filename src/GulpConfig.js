@@ -37,9 +37,12 @@ class GulpConfig {
     this.tslintConfig = require('../tslint');
 
     this.babel = this.babel.bind(this);
-    this.config = this.config.bind(this);
-    this.initialize = this.initialize.bind(this);
+    this.config = this.config.bind(this);    
     this.tslint = this.tslint.bind(this);
+
+    this.init = this.init.bind(this);
+    this.initialize = this.initialize.bind(this);
+
 
     this._config = {
       prefix: 'gulpconfig:',
@@ -58,34 +61,65 @@ class GulpConfig {
     const { prefix } = this._config;
 
     this.tasks = {
-      jsTask: `${prefix}js`,
-      tsTask: `${prefix}ts`,
+      clean: `${prefix}clean`, //clear out the lib filter
+      cleanDist: `${prefix}clean:dist`, //clear out the dist folder
+
+      //typescript
+      tsLint: `${prefix}ts-lint`, //lint typescript
+      tsCompile: `${prefix}ts-compile`, //compile typescript
+      tsTask: `${prefix}ts`, //do both
+
+      //javascript
+      jsTask: `${prefix}js`, //lint and compile javascript
+      
+      allCompile: `${prefix}compile`, //lint and compile javascript and typecsript
       otherTask: `${prefix}other`, //move all non-ts and js files to lib,
-      buildDist: `${prefix}build:dist`
+      watchAll: `${prefix}watch`,
+
+      buildLib: `${prefix}build`, //build dev
+      buildDist: `${prefix}build:dist` //build for production
     };
 
     this._config.appRoot = appRoot.path;
   }
 
-  babel(config) {
-    this.babelConfig = config;
-  }
+
 
   config(config) {
     this._config = Object.assign({}, this._config, config);
   }
 
+  /**
+   * change tslint config
+   */
   tslint(config) {
     this.tslintConfig = config;
   }
-  
+
+  /**
+   * change babel config
+   */
+  babel(config) {
+    this.babelConfig = config;
+  }
+
+  /**
+   * change eslint config
+   */
   eslint(config) {
     this.eslintConfig = config;
   }
 
+  /**
+   * shorthand syntax for initialize
+   */
+  init(){
+    this.initialize();
+  }
+
   initialize() {
     //const self = this;
-    const { _config, _config: { prefix }, babelConfig, eslintConfig, gulp, tasks, tslintConfig, webpackProdConfig } = this;
+    const { _config, babelConfig, eslintConfig, gulp, tasks, tslintConfig, webpackProdConfig } = this;
 
     /**
      * testing
@@ -129,10 +163,10 @@ class GulpConfig {
     /**
      * deployment
      */
-    gulp.task(tasks.buildDist, [`${prefix}clean:dist`, `${prefix}build`], function (cb) {
+    gulp.task(tasks.buildDist, [tasks.cleanDist, tasks.buildLib], function () {
 
       //move non-script assets
-      gulp.src(`${_config.outputPath}/**/!(*.js|*.ts|*.map|*.src)`)
+      gulp.src(`${_config.outputPath}/**/*!(*.js|*.ts|*.map|*.src|*.css)`)
         .pipe(gulp.dest(_config.deployPath));
 
     // run webpack
@@ -168,22 +202,22 @@ class GulpConfig {
      * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
      */
     gulp.task('prepublish', ['nsp', tasks.buildDist]);
-    gulp.task('default', [`${prefix}compile`, 'test', 'coveralls']);
+    gulp.task('default', [tasks.allCompile, 'test', 'coveralls']);
 
     /**
      * watch task
      */
     //TODO: watch only client code.
-    gulp.task(`${prefix}watch`, function () {
-      gulp.watch(_config.allJs, [`${prefix}js`]);
-      gulp.watch(_config.allTs, [`${prefix}ts`]);
-      gulp.watch(_config.allOther, [`${prefix}other`]);
+    gulp.task(tasks.watchAll, function () {
+      gulp.watch(_config.allJs, [tasks.allJs]);
+      gulp.watch(_config.allTs, [tasks.allTs]);
+      gulp.watch(_config.allOther, [tasks.allOther]);
     });
 
     /**
      * Compile TypeScript and include references to library and app .d.ts files.
      */
-    gulp.task(`${prefix}ts-compile`, function () {
+    gulp.task(tasks.tsCompile, function () {
 
       const sourceTsFiles = [
         _config.allTs,   //path to typescript files
@@ -223,17 +257,23 @@ class GulpConfig {
         .pipe(gulp.dest(_config.outputPath));
     });
 
-    gulp.task(tasks.tsTask, [`${prefix}ts-lint`, `${prefix}ts-compile`]);
-    const compileTask = `${prefix}compile`;
-    gulp.task(compileTask, [tasks.tsTask, tasks.jsTask, tasks.otherTask]);
-    gulp.task(`${prefix}build`, [`${prefix}clean`, tasks.tsTask, tasks.jsTask]);
+    gulp.task(tasks.tsTask, [tasks.tsLint, tasks.tsCompile]);
+    
+    /**
+     * compile all src code into lib
+     */
+    gulp.task(tasks.allCompile, [tasks.tsTask, tasks.jsTask, tasks.otherTask]);
+    /**
+     * clean and then compile into lib
+     */
+    gulp.task(tasks.buildLib, [tasks.clean, tasks.allCompile]);
 
     //TODO: watch only server code.
-    gulp.task('dev', [`${prefix}clean`, compileTask], () => { // 'start'
+    gulp.task('dev', [tasks.clean, tasks.allCompile], () => { // 'start'
       nodemon({
         script: `${_config.outputPath}${_config.serverMain}`, // run ES5 code 
         watch: 'src/server/**.*', // watch ES2015 code 
-        tasks: [compileTask] // compile synchronously onChange 
+        tasks: [tasks.allCompile] // compile synchronously onChange 
       });
     });
 
@@ -244,7 +284,7 @@ class GulpConfig {
     /**
      * Lint all custom TypeScript files.
      */
-    gulp.task(`${prefix}ts-lint`, function () {
+    gulp.task(tasks.tsLint, function () {
       return gulp.src(_config.allTs)
         .pipe(tslint({
           formatter: 'verbose',
@@ -255,12 +295,13 @@ class GulpConfig {
     /**
      * deletes everything in the output path
      */
-    gulp.task(`${prefix}clean`, function () {
+    gulp.task(tasks.clean, function () {
       return del.sync([`${_config.outputPath}/*.js`]);
     });
-    gulp.task(`${prefix}clean:dist`, function () {
+    gulp.task(tasks.cleanDist, function () {
       return del.sync([`${_config.deployPath}/*.js`]);
     });
+
   }
 
 }

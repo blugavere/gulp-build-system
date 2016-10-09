@@ -18,7 +18,7 @@ module.exports = function (config) {
         output: {
             path: 'dist/client',
             publicPath: 'dist/client',
-            filename: '[hash].js'
+            filename: 'bundle.js'
         },
         devServer: {
             contentBase: './dist/client'
@@ -48,7 +48,10 @@ module.exports = function (config) {
             new webpack.optimize.DedupePlugin(), //dedupes bundles
             new webpack.optimize.UglifyJsPlugin(),
             new HtmlWebpackPlugin({
-                title: 'Ben Lugavere'
+                title: 'Ben Lugavere',
+                hash: true,
+                //template: './src/client/index.template.ejs',
+                inject: 'body'
             }),
         ]
     };
