@@ -43,7 +43,7 @@ $ npm i --save-dev gulp-build-config
 // gulpfile.js
 const gulp = require('gulp');
 
-const GulpConfig = require('./src/gulpConfig');
+const GulpConfig = require('gulp-build-system');
 const gulpConfig = new GulpConfig(gulp);
 gulpConfig.initialize();
 

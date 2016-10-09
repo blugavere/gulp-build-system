@@ -6,3 +6,4 @@ dist
 coverage
 lib
 *.log ; ignore all anyfile.log 
+.DS_Store
