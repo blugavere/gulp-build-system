@@ -1,7 +1,7 @@
 const fs = require('fs');
 const del = require('del');
 const babel = require('gulp-babel');
-const print = require('gulp-print');
+//const print = require('gulp-print');
 const eslint = require('gulp-eslint');
 const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
@@ -40,6 +40,7 @@ class GulpConfig {
       prefix: 'gulpconfig:',
       allJs: 'src/**/*.js',
       allTs: 'src/**/*.ts',
+      allOther: 'src/**/!(*.js|*.ts|*.map|*.src)',
       libraryTypeScriptDefinitions: 'typings/**/*.d.ts',
       outputPath: 'lib',
       deployPath: 'dist',
@@ -48,6 +49,14 @@ class GulpConfig {
       serverMain: '/server/app.js',
       serverWatch: '/server/**.*'
     };
+    const { prefix } = this._config;
+
+    this.tasks = {
+      jsTask: `${prefix}js`,
+      tsTask: `${prefix}ts`,
+      otherTask: `${prefix}other` //move all non-ts and js files to lib
+    };
+
     this._config.appRoot = appRoot.path;
   }
 
@@ -69,7 +78,7 @@ class GulpConfig {
 
   initialize() {
     //const self = this;
-    const { _config, _config: { prefix }, babelConfig, eslintConfig, gulp, tslintConfig } = this;
+    const { _config, _config: { prefix }, babelConfig, eslintConfig, gulp, tasks, tslintConfig } = this;
 
     /**
      * testing
@@ -141,6 +150,7 @@ class GulpConfig {
     gulp.task(`${prefix}watch`, function () {
       gulp.watch(_config.allJs, [`${prefix}js`]);
       gulp.watch(_config.allTs, [`${prefix}ts`]);
+      gulp.watch(_config.allOther, [`${prefix}other`]);
     });
 
     /**
@@ -168,22 +178,28 @@ class GulpConfig {
     /**
      * Compile javascript through babel.
      */
-    const jsTask = `${prefix}js`;
-    gulp.task(jsTask, function () {
+    gulp.task(tasks.jsTask, function () {
       return gulp.src(_config.allJs)
         .pipe(excludeGitignore())
-        .pipe(print())
+        //.pipe(print())
         .pipe(eslint(eslintConfig))
         .pipe(eslint.format())
         .pipe(babel(babelConfig))
         .pipe(gulp.dest(_config.outputPath));
     });
 
-    const tsTask = `${prefix}ts`;
-    gulp.task(tsTask, [`${prefix}ts-lint`, `${prefix}ts-compile`]);
+
+    gulp.task(tasks.otherTask, function(){
+      return gulp.src(_config.allOther)
+        .pipe(excludeGitignore())
+        //.pipe(print())
+        .pipe(gulp.dest(_config.outputPath));
+    });
+
+    gulp.task(tasks.tsTask, [`${prefix}ts-lint`, `${prefix}ts-compile`]);
     const compileTask = `${prefix}compile`;
-    gulp.task(compileTask, [tsTask, jsTask]);
-    gulp.task(`${prefix}build`, [`${prefix}clean`, tsTask, jsTask]);
+    gulp.task(compileTask, [tasks.tsTask, tasks.jsTask, tasks.otherTask]);
+    gulp.task(`${prefix}build`, [`${prefix}clean`, tasks.tsTask, tasks.jsTask]);
 
     //TODO: watch only server code.
     gulp.task('dev', [`${prefix}clean`, compileTask], () => { // 'start'
