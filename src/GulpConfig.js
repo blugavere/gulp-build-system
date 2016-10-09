@@ -33,18 +33,24 @@ class GulpConfig {
     this.eslintConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.eslintrc')));
     this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
     this.webpackProdConfig = require('../webpack.config.prod')({}); //TODO: enable dynamic configs
-    
+
     this.tslintConfig = require('../tslint');
 
     this.babel = this.babel.bind(this);
-    this.config = this.config.bind(this);    
+    this.config = this.config.bind(this);
     this.tslint = this.tslint.bind(this);
 
+
     this.init = this.init.bind(this);
+    this.initTs = this.initTs.bind(this);
+    this.initJs = this.initJs.bind(this);
+    this.initTest = this.initTest.bind(this);
+    this.initClean = this.initClean.bind(this);
+
     this.initialize = this.initialize.bind(this);
 
 
-    this._config = {
+    this.config = {
       prefix: 'gulpconfig:',
       allJs: 'src/**/*.js',
       allTs: 'src/**/*.ts',
@@ -58,7 +64,7 @@ class GulpConfig {
       serverMain: '/server/app.js',
       serverWatch: '/server/**.*'
     };
-    const { prefix } = this._config;
+    const { prefix } = this.config;
 
     this.tasks = {
       clean: `${prefix}clean`, //clear out the lib filter
@@ -71,7 +77,7 @@ class GulpConfig {
 
       //javascript
       jsTask: `${prefix}js`, //lint and compile javascript
-      
+
       allCompile: `${prefix}compile`, //lint and compile javascript and typecsript
       otherTask: `${prefix}other`, //move all non-ts and js files to lib,
       watchAll: `${prefix}watch`,
@@ -80,13 +86,13 @@ class GulpConfig {
       buildDist: `${prefix}build:dist` //build for production
     };
 
-    this._config.appRoot = appRoot.path;
+    this.config.appRoot = appRoot.path;
   }
 
 
 
   config(config) {
-    this._config = Object.assign({}, this._config, config);
+    this.config = Object.assign({}, this.config, config);
   }
 
   /**
@@ -113,23 +119,82 @@ class GulpConfig {
   /**
    * shorthand syntax for initialize
    */
-  init(){
+  init() {
     this.initialize();
   }
 
-  initialize() {
-    //const self = this;
-    const { _config, babelConfig, eslintConfig, gulp, tasks, tslintConfig, webpackProdConfig } = this;
+  /** 
+   * typescript tasks
+   */
+  initTs() {
+    const { config, gulp, tasks, tslintConfig } = this;
 
+    /**
+    * Lint all custom TypeScript files.
+    */
+    gulp.task(tasks.tsLint, function () {
+      return gulp.src(config.allTs)
+        .pipe(tslint({
+          formatter: 'verbose',
+          configuration: tslintConfig
+        })).pipe(tslint.report());
+    });
+
+    /**
+     * Compile TypeScript and include references to library and app .d.ts files.
+     */
+    gulp.task(tasks.tsCompile, function () {
+
+      const sourceTsFiles = [
+        config.allTs,   //path to typescript files
+        //config.libraryTypeScriptDefinitions  //reference to library .d.ts files
+      ];
+
+      const tsResult = gulp.src(sourceTsFiles)
+        .pipe(excludeGitignore())
+        .pipe(sourcemaps.init())
+        .pipe(ts(tsProject));
+
+      tsResult.dts.pipe(gulp.dest(config.outputPath));
+
+      return tsResult.js.pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(config.outputPath));
+
+    });
+
+    /**
+     * do both
+     */
+    gulp.task(tasks.tsTask, [tasks.tsLint, tasks.tsCompile]);
+  }
+
+  initJs() {
+    const { babelConfig, config, gulp, tasks, eslintConfig } = this;
+
+    /**
+     * Compile javascript through babel.
+     */
+    gulp.task(tasks.jsTask, function () {
+      return gulp.src(config.allJs)
+        .pipe(excludeGitignore())
+        //.pipe(print())
+        .pipe(eslint(eslintConfig))
+        .pipe(eslint.format())
+        .pipe(babel(babelConfig))
+        .pipe(gulp.dest(config.outputPath));
+    });
+  }
+
+  initTest() {
+    const { config, gulp } = this;
     /**
      * testing
      */
     gulp.task('pre-test', function () {
       return gulp.src([
-        `${_config.outputPath}/**/*.js`,
-        `!${_config.outputPath}/**/*.test.js`,
-      ]
-        )
+        `${config.outputPath}/**/*.js`,
+        `!${config.outputPath}/**/*.test.js`,
+      ])
         .pipe(excludeGitignore())
         .pipe(istanbul({
           includeUntested: true,
@@ -141,9 +206,9 @@ class GulpConfig {
     gulp.task('test', ['pre-test'], function (cb) {
       var mochaErr;
 
-      gulp.src(`${_config.outputPath}/**/*.test.js`)
+      gulp.src(`${config.outputPath}/**/*.test.js`)
         .pipe(plumber())
-        .pipe(mocha({reporter: 'spec'}))
+        .pipe(mocha({ reporter: 'spec' }))
         .on('error', function (err) {
           mochaErr = err;
         })
@@ -153,11 +218,43 @@ class GulpConfig {
         });
     });
 
+    gulp.task('coveralls', ['test'], function () {
+      if (!process.env.CI) {
+        return;
+      }
+      return gulp.src(path.join(config.appRoot, 'coverage/lcov.info'))
+        .pipe(coveralls());
+    });
+  }
+
+  initClean() {
+    const { config, gulp, tasks } = this;
+    /**
+     * deletes everything in the output path
+     */
+    gulp.task(tasks.clean, function () {
+      return del.sync([`${config.outputPath}/**`]);
+    });
+    gulp.task(tasks.cleanDist, function () {
+      return del.sync([`${config.deployPath}/**`]);
+    });
+
+    gulp.task('clean', [tasks.clean, tasks.cleanDist]);
+  }
+
+  initialize() {
+    const { config, babelConfig, gulp, tasks, webpackProdConfig } = this;
+
+    this.initTs();
+    this.initJs();
+    this.initTest();
+    this.initClean();
+    
     /** 
      * security
      */
     gulp.task('nsp', function (cb) {
-      nsp({package: path.join(_config.appRoot, 'package.json')}, cb);
+      nsp({ package: path.join(config.appRoot, 'package.json') }, cb);
     });
 
     /**
@@ -166,37 +263,24 @@ class GulpConfig {
     gulp.task(tasks.buildDist, [tasks.cleanDist, tasks.buildLib], function () {
 
       //move non-script assets
-      gulp.src(`${_config.outputPath}/**/*!(*.js|*.ts|*.map|*.src|*.css)`)
-        .pipe(gulp.dest(_config.deployPath));
+      gulp.src(`${config.outputPath}/**/*!(*.js|*.ts|*.map|*.src|*.css|*.ejs)`)
+        .pipe(gulp.dest(config.deployPath));
 
-    // run webpack
-        webpack(webpackProdConfig, function(err, stats) {
-            if(err) throw new gutil.PluginError('webpack', err);
-              gutil.log('[webpack', stats.toString({
-                  // output options
-              }));
-            //cb();
-        });
-
-      //compile client`${_config.outputPath}${_config.clientMain}`this.webpackProdConfig
-      /*gulp.src('lib/client/index.js')
-        .pipe(print())
-        .pipe(webpack(this.webpackProdConfig))
-        .pipe(gulp.dest('dist/client/'));*/
+      // run webpack
+      webpack(webpackProdConfig, function (err, stats) {
+        if (err) throw new gutil.PluginError('webpack', err);
+        gutil.log('[webpack]', stats.toString({
+          // output options
+        }));
+        //cb();
+      });
 
       //compile server
-      return gulp.src(`${_config.outputPath}/server/**/*.js`)
+      return gulp.src(`${config.outputPath}/server/**/*.js`)
         .pipe(babel(babelConfig))
-        .pipe(gulp.dest(`${_config.deployPath}/server`));
+        .pipe(gulp.dest(`${config.deployPath}/server`));
     });
 
-    gulp.task('coveralls', ['test'], function () {
-      if (!process.env.CI) {
-        return;
-      }
-      return gulp.src(path.join(_config.appRoot, 'coverage/lcov.info'))
-        .pipe(coveralls());
-    });
 
     /**
      * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
@@ -209,60 +293,25 @@ class GulpConfig {
      */
     //TODO: watch only client code.
     gulp.task(tasks.watchAll, function () {
-      gulp.watch(_config.allJs, [tasks.allJs]);
-      gulp.watch(_config.allTs, [tasks.allTs]);
-      gulp.watch(_config.allOther, [tasks.allOther]);
+      gulp.watch(config.allJs, [tasks.allJs]);
+      gulp.watch(config.allTs, [tasks.allTs]);
+      gulp.watch(config.allOther, [tasks.allOther]);
     });
 
-    /**
-     * Compile TypeScript and include references to library and app .d.ts files.
-     */
-    gulp.task(tasks.tsCompile, function () {
 
-      const sourceTsFiles = [
-        _config.allTs,   //path to typescript files
-        //config.libraryTypeScriptDefinitions  //reference to library .d.ts files
-      ];
-
-      const tsResult = gulp.src(sourceTsFiles)
-        .pipe(excludeGitignore())
-        .pipe(sourcemaps.init())
-        .pipe(ts(tsProject));
-
-      tsResult.dts.pipe(gulp.dest(_config.outputPath));
-
-      return tsResult.js.pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(_config.outputPath));
-
-    });
-
-    /**
-     * Compile javascript through babel.
-     */
-    gulp.task(tasks.jsTask, function () {
-      return gulp.src(_config.allJs)
+    gulp.task(tasks.otherTask, function () {
+      return gulp.src(config.allOther)
         .pipe(excludeGitignore())
         //.pipe(print())
-        .pipe(eslint(eslintConfig))
-        .pipe(eslint.format())
-        .pipe(babel(babelConfig))
-        .pipe(gulp.dest(_config.outputPath));
+        .pipe(gulp.dest(config.outputPath));
     });
 
 
-    gulp.task(tasks.otherTask, function(){
-      return gulp.src(_config.allOther)
-        .pipe(excludeGitignore())
-        //.pipe(print())
-        .pipe(gulp.dest(_config.outputPath));
-    });
-
-    gulp.task(tasks.tsTask, [tasks.tsLint, tasks.tsCompile]);
-    
     /**
      * compile all src code into lib
      */
     gulp.task(tasks.allCompile, [tasks.tsTask, tasks.jsTask, tasks.otherTask]);
+
     /**
      * clean and then compile into lib
      */
@@ -271,39 +320,13 @@ class GulpConfig {
     //TODO: watch only server code.
     gulp.task('dev', [tasks.clean, tasks.allCompile], () => { // 'start'
       nodemon({
-        script: `${_config.outputPath}${_config.serverMain}`, // run ES5 code 
+        script: `${config.outputPath}${config.serverMain}`, // run ES5 code 
         watch: 'src/server/**.*', // watch ES2015 code 
         tasks: [tasks.allCompile] // compile synchronously onChange 
       });
     });
 
-    /**
-    * Completed
-    */
-
-    /**
-     * Lint all custom TypeScript files.
-     */
-    gulp.task(tasks.tsLint, function () {
-      return gulp.src(_config.allTs)
-        .pipe(tslint({
-          formatter: 'verbose',
-          configuration: tslintConfig
-        })).pipe(tslint.report());
-    });
-
-    /**
-     * deletes everything in the output path
-     */
-    gulp.task(tasks.clean, function () {
-      return del.sync([`${_config.outputPath}/*.js`]);
-    });
-    gulp.task(tasks.cleanDist, function () {
-      return del.sync([`${_config.deployPath}/*.js`]);
-    });
-
   }
-
 }
 
 module.exports = GulpConfig;
