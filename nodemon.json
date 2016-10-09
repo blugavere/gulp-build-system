@@ -1,6 +1,6 @@
 {
   "verbose": true,
-  "watch": ["build/"],
+  "watch": ["lib/"],
   "delay": 2000
 }
 

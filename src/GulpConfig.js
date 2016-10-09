@@ -321,7 +321,7 @@ class GulpConfig {
     gulp.task('dev', [tasks.clean, tasks.allCompile], () => { // 'start'
       nodemon({
         script: `${config.outputPath}${config.serverMain}`, // run ES5 code 
-        watch: 'src/server/**.*', // watch ES2015 code 
+        watch: 'src/server/**/*', // watch ES2015 code 
         tasks: [tasks.allCompile] // compile synchronously onChange 
       });
     });
