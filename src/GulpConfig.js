@@ -64,7 +64,9 @@ class GulpConfig {
       serverMain: '/server/app.js',
       serverWatch: '/server/**.*'
     };
-    const { prefix } = this.config;
+    const {
+      prefix
+    } = this.config;
 
     this.tasks = {
       clean: `${prefix}clean`, //clear out the lib filter
@@ -127,12 +129,17 @@ class GulpConfig {
    * typescript tasks
    */
   initTs() {
-    const { config, gulp, tasks, tslintConfig } = this;
+    const {
+      config,
+      gulp,
+      tasks,
+      tslintConfig
+    } = this;
 
     /**
-    * Lint all custom TypeScript files.
-    */
-    gulp.task(tasks.tsLint, function () {
+     * Lint all custom TypeScript files.
+     */
+    gulp.task(tasks.tsLint, function() {
       return gulp.src(config.allTs)
         .pipe(tslint({
           formatter: 'verbose',
@@ -143,10 +150,10 @@ class GulpConfig {
     /**
      * Compile TypeScript and include references to library and app .d.ts files.
      */
-    gulp.task(tasks.tsCompile, function () {
+    gulp.task(tasks.tsCompile, function() {
 
       const sourceTsFiles = [
-        config.allTs,   //path to typescript files
+        config.allTs, //path to typescript files
         //config.libraryTypeScriptDefinitions  //reference to library .d.ts files
       ];
 
@@ -169,12 +176,22 @@ class GulpConfig {
   }
 
   initJs() {
-    const { babelConfig, config, gulp, tasks, eslintConfig } = this;
+    const {
+      babelConfig,
+      config,
+      gulp,
+      tasks,
+      eslintConfig
+    } = this;
+
+    /** resolve babel configs relative to this file instead of root */
+    babelConfig.presets = babelConfig.presets.map(x => `babel-preset-${x}`).map(require.resolve);
+    babelConfig.plugins = babelConfig.plugins.map(x => `babel-plugin-${x}`).map(require.resolve);
 
     /**
      * Compile javascript through babel.
      */
-    gulp.task(tasks.jsTask, function () {
+    gulp.task(tasks.jsTask, function() {
       return gulp.src(config.allJs)
         .pipe(excludeGitignore())
         //.pipe(print())
@@ -186,15 +203,18 @@ class GulpConfig {
   }
 
   initTest() {
-    const { config, gulp } = this;
+    const {
+      config,
+      gulp
+    } = this;
     /**
      * testing
      */
-    gulp.task('pre-test', function () {
+    gulp.task('pre-test', function() {
       return gulp.src([
-        `${config.outputPath}/**/*.js`,
-        `!${config.outputPath}/**/*.test.js`,
-      ])
+          `${config.outputPath}/**/*.js`,
+          `!${config.outputPath}/**/*.test.js`,
+        ])
         .pipe(excludeGitignore())
         .pipe(istanbul({
           includeUntested: true,
@@ -203,22 +223,24 @@ class GulpConfig {
         .pipe(istanbul.hookRequire());
     });
 
-    gulp.task('test', ['pre-test'], function (cb) {
+    gulp.task('test', ['pre-test'], function(cb) {
       var mochaErr;
 
       gulp.src(`${config.outputPath}/**/*.test.js`)
         .pipe(plumber())
-        .pipe(mocha({ reporter: 'spec' }))
-        .on('error', function (err) {
+        .pipe(mocha({
+          reporter: 'spec'
+        }))
+        .on('error', function(err) {
           mochaErr = err;
         })
         .pipe(istanbul.writeReports())
-        .on('end', function () {
+        .on('end', function() {
           cb(mochaErr);
         });
     });
 
-    gulp.task('coveralls', ['test'], function () {
+    gulp.task('coveralls', ['test'], function() {
       if (!process.env.CI) {
         return;
       }
@@ -228,14 +250,18 @@ class GulpConfig {
   }
 
   initClean() {
-    const { config, gulp, tasks } = this;
+    const {
+      config,
+      gulp,
+      tasks
+    } = this;
     /**
      * deletes everything in the output path
      */
-    gulp.task(tasks.clean, function () {
+    gulp.task(tasks.clean, function() {
       return del.sync([`${config.outputPath}/**`]);
     });
-    gulp.task(tasks.cleanDist, function () {
+    gulp.task(tasks.cleanDist, function() {
       return del.sync([`${config.deployPath}/**`]);
     });
 
@@ -243,31 +269,39 @@ class GulpConfig {
   }
 
   initialize() {
-    const { config, babelConfig, gulp, tasks, webpackProdConfig } = this;
+    const {
+      config,
+      babelConfig,
+      gulp,
+      tasks,
+      webpackProdConfig
+    } = this;
 
     this.initTs();
     this.initJs();
     this.initTest();
     this.initClean();
-    
+
     /** 
      * security
      */
-    gulp.task('nsp', function (cb) {
-      nsp({ package: path.join(config.appRoot, 'package.json') }, cb);
+    gulp.task('nsp', function(cb) {
+      nsp({
+        package: path.join(config.appRoot, 'package.json')
+      }, cb);
     });
 
     /**
      * deployment
      */
-    gulp.task(tasks.buildDist, [tasks.cleanDist, tasks.buildLib], function () {
+    gulp.task(tasks.buildDist, [tasks.cleanDist, tasks.buildLib], function() {
 
       //move non-script assets
       gulp.src(`${config.outputPath}/**/*!(*.js|*.ts|*.map|*.src|*.css|*.ejs)`)
         .pipe(gulp.dest(config.deployPath));
 
       // run webpack
-      webpack(webpackProdConfig, function (err, stats) {
+      webpack(webpackProdConfig, function(err, stats) {
         if (err) throw new gutil.PluginError('webpack', err);
         gutil.log('[webpack]', stats.toString({
           // output options
@@ -292,14 +326,14 @@ class GulpConfig {
      * watch task
      */
     //TODO: watch only client code.
-    gulp.task(tasks.watchAll, function () {
+    gulp.task(tasks.watchAll, function() {
       gulp.watch(config.allJs, [tasks.allJs]);
       gulp.watch(config.allTs, [tasks.allTs]);
       gulp.watch(config.allOther, [tasks.allOther]);
     });
 
 
-    gulp.task(tasks.otherTask, function () {
+    gulp.task(tasks.otherTask, function() {
       return gulp.src(config.allOther)
         .pipe(excludeGitignore())
         //.pipe(print())
