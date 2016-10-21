@@ -5,7 +5,8 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = {
   loaders: [
     {
-      test: /\.js$/, include: [
+      test: /\.js$/, 
+      include: [
         path.join(__dirname, '../lib'),
         path.join(__dirname, '../src')
       ],
@@ -19,7 +20,10 @@ module.exports = {
       loaders: ['babel'],
     },
     { test: /\.json$/, loaders: ['json'] },
-    { test: /\.ts$/, loader: 'ts-loader' },
+    { 
+      test: /\.ts$/, 
+      loader: 'ts-loader'
+    },
     {
       test: /(\.css)$/,
       loaders: ['style', 'css']

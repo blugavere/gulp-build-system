@@ -6,8 +6,9 @@
         "preserveConstEnums": true,
         "outDir": "build",
         "sourceMap": true,
-        "declaration": true,
-        "allowJs": true
+        "allowJs": true,
+        "experimentalDecorators": true,
+        "jsx": "react"
     },
     "exclude": [
         "node_modules",

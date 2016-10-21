@@ -16,6 +16,7 @@ module.exports = config => {
     devtool: 'cheap-module-eval-source-map',
     noInfo: false,
     target: 'web',
+    inline: true,
     resolve: {
       extensions: ['', '.webpack.js', '.web.js', '.ts', '.tsx', '.js', '.css', '.less', 'scss', '.jsx']
     },

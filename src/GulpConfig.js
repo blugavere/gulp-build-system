@@ -1,7 +1,7 @@
 const fs = require('fs');
 const del = require('del');
 const babel = require('gulp-babel');
-const print = require('gulp-print');
+//const print = require('gulp-print');
 const eslint = require('gulp-eslint');
 const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
@@ -38,6 +38,7 @@ class GulpConfig {
 
     this.babel = this.babel.bind(this);
     this.setConfig = this.setConfig.bind(this);
+    
     this.defineTasks = this.defineTasks.bind(this);
     this.definePaths = this.definePaths.bind(this);
     
@@ -54,7 +55,7 @@ class GulpConfig {
 
 
     this.config = {
-      prefix: 'ok',
+      //prefix: '',
       allJs: 'src/**/*.js',
       allTs: 'src/**/*.ts',
       allOther: 'src/**/!(*.js|*.ts|*.map|*.src)',
@@ -66,10 +67,7 @@ class GulpConfig {
 
       typings: './typings/',
       defs: 'release/definitions',
-      clientMain: '/client/index',
-
-      //serverEntry: '/server/app.js',
-      //serverWatch: '/server/**/*'
+      clientMain: '/client/index'
     };
 
   }
@@ -78,7 +76,7 @@ class GulpConfig {
     const { config, config: { buildRoot, sourceRoot } } = this;
     this.config = Object.assign({}, this.config, {
       serverEntry: config.serverEntry || `${buildRoot}/server/app.js`,
-      serverWatch: config.serverWatch || `${sourceRoot}/server/**/*`
+      serverWatch: config.serverWatch || `${sourceRoot}/server/**`
     });
   }
 
@@ -86,29 +84,36 @@ class GulpConfig {
     prefix = prefix || this.config.prefix;
 
     this.tasks = {
-      clean: `${prefix}clean`, //clear out the lib filter
-      cleanDist: `${prefix}clean:dist`, //clear out the dist folder
+      clean: 'clean', //clear out the lib filter
+      cleanBuild: 'clean:build',
+      cleanDist: 'clean:dist', //clear out the dist folder
 
       //typescript
-      tsLint: `${prefix}ts-lint`, //lint typescript
-      tsCompile: `${prefix}ts-compile`, //compile typescript
-      tsTask: `${prefix}ts`, // do both
+      tsLint: 'ts-lint', //lint typescript
+      tsCompile: 'ts-compile', //compile typescript
+      tsTask: 'ts', // do both
 
       /** javascript process */
-      jsTask: `${prefix}js`, // lint and compile javascript
+      jsTask: 'js', // lint and compile javascript
 
-      allCompile: `${prefix}compile`, // lint and compile javascript and typecsript
-      otherTask: `${prefix}other`, // move all non-ts and js files to lib,
-      watchAll: `${prefix}watch`,
+      allCompile: 'compile', // lint and compile javascript and typecsript
+      otherTask: 'other', // move all non-ts and js files to lib,
+      watchAll: 'watch',
 
-      buildLib: `${prefix}build`, // build dev
-      buildDist: `${prefix}build:dist`, // build for production
+      buildLib: 'build', // build dev
+      buildDist: 'build:dist', // build for production
 
-      startServer: `${prefix}dev:server`, // start nodemon process
-      startClient: `${prefix}dev:client`,
-      start: `${prefix}dev` // start client & server 
+      startServer: 'dev:server', // start nodemon process
+      startClient: 'dev:client',
+      start: 'dev' // start client & server 
     };
 
+    if(prefix) {
+      for(let i in this.tasks) {
+        this.tasks[i] = `${prefix}${this.tasks[i]}`;
+      }
+    }
+    
     this.config.appRoot = appRoot.path;
   }
 
@@ -248,7 +253,7 @@ class GulpConfig {
     /**
      * deletes everything in the output path
      */
-    gulp.task(tasks.clean, () => {
+    gulp.task(tasks.cleanBuild, () => {
       del.sync([`${config.buildRoot}/**`]);
     });
 
@@ -256,7 +261,7 @@ class GulpConfig {
       return del.sync([`${config.deployRoot}/**`]);
     });
 
-    gulp.task('clean', [tasks.clean, tasks.cleanDist]);
+    gulp.task(tasks.clean, [tasks.cleanBuild, tasks.cleanDist]);
   }
 
   initialize() {
@@ -272,7 +277,7 @@ class GulpConfig {
       webpackProdConfig
     } = this;
 
-    console.log(tasks, config);
+    console.log(tasks);
     this.initTs();
     this.initJs();
     this.initTest();
@@ -294,7 +299,7 @@ class GulpConfig {
     gulp.task(tasks.buildDist, [tasks.cleanDist, tasks.buildLib], function () {
 
       //move non-script assets
-      gulp.src(`${config.buildRoot}/**/*!(*.js|*.ts|*.map|*.src|*.css|*.ejs)`)
+      gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.src|*.css|*.ejs)`)
         .pipe(gulp.dest(config.deployRoot));
 
       // run webpack
@@ -352,6 +357,7 @@ class GulpConfig {
      * clean all, compile, run, and watch server
      */
     gulp.task(tasks.startServer, [tasks.clean, tasks.allCompile], () => { // 'start'
+      console.log('Start called.');
       nodemon({
         script: config.serverEntry, // run ES5 code 
         watch: config.serverWatch, // watch server code 

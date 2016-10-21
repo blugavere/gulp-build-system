@@ -103,3 +103,6 @@ prefix //string - defines namespace for all gulpconfig.
 
 * **file**: namespaces generated gulp tasks
 * **url**: The url loader works like the file loader, but can return a Data Url if the file is smaller 
+
+## Prior Art
+* [`react-slingshot`](https://github.com/coryhouse/react-slingshot) - Corey House
