@@ -26,6 +26,7 @@ $ npm i
 $ typings i
 $ npm run dev
 ```
+
 ### Installation ###
 
 ```js
@@ -76,3 +77,29 @@ $ gulp watch
 $ npm publish
 
 ```
+
+## Commands
+These come out of the box. Namespacing is available via configuration.
+* **clean**: clears the lib folder
+* **clean:dist**: clears the dist folder
+
+
+## configuration
+
+How to persionalize:
+
+All configuration is done by using the provided setter API. Do not overwrite!
+
+```js
+//setter api
+gulpConfig.config({
+    key: value
+})
+
+//In order to namespace:
+prefix //string - defines namespace for all gulpconfig.
+
+```
+
+* **file**: namespaces generated gulp tasks
+* **url**: The url loader works like the file loader, but can return a Data Url if the file is smaller 
