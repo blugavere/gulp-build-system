@@ -37,7 +37,7 @@
     "@types/node": "^6.0.45",
     "expect": "^1.20.2",
     "express": "^4.14.0",
-    "gulp": "^3.9.1",
+    "gulp": "github:gulpjs/gulp#4.0",
     "gulp-exclude-gitignore": "^1.0.0",
     "gulp-istanbul": "^1.1.1",
     "gulp-nodemon": "^2.2.1"

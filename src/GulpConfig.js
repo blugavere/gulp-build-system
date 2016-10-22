@@ -227,7 +227,7 @@ class GulpConfig {
         .pipe(istanbul.hookRequire());
     });
 
-    gulp.task('test', gulp.series(['pre-test']), (cb) => {
+    gulp.task('test', gulp.series('pre-test', (cb) => {
       let mochaErr;
 
       gulp.src(`${config.buildRoot}/**/*.test.js`)
@@ -242,15 +242,15 @@ class GulpConfig {
         .on('end', () => {
           cb(mochaErr);
         });
-    });
+    }));
 
-    gulp.task('coveralls', gulp.series(['test']), () => {
+    gulp.task('coveralls', gulp.series('test', () => {
       if (!process.env.CI) {
         return;
       }
       return gulp.src(path.join(config.appRoot, 'coverage/lcov.info'))
         .pipe(coveralls());
-    });
+    }));
   }
 
   initClean() {
@@ -299,14 +299,14 @@ class GulpConfig {
      * watch task
      */
     //TODO: watch only client code.
-    gulp.task(tasks.watchAll, function () {
+    gulp.task(tasks.watchAll, () => {
       gulp.watch(config.allJs, [tasks.allJs]);
       gulp.watch(config.allTs, [tasks.allTs]);
       gulp.watch(config.allOther, [tasks.allOther]);
     });
 
 
-    gulp.task(tasks.otherTask, function () {
+    gulp.task(tasks.otherTask, () => {
       return gulp.src(config.allOther)
         .pipe(excludeGitignore())
         //.pipe(print())
@@ -362,7 +362,7 @@ class GulpConfig {
     /**
      * deployment
      */
-    gulp.task(tasks.buildDist, gulp.series([tasks.cleanDist, tasks.buildLib]), () => {
+    gulp.task(tasks.buildDist, gulp.series(tasks.cleanDist, tasks.buildLib, () => {
 
       //move non-script assets
       gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.src|*.css|*.ejs)`)
@@ -374,14 +374,13 @@ class GulpConfig {
         gutil.log('[webpack]', stats.toString({
           // output options
         }));
-        //cb();
       });
 
       //compile server
       return gulp.src(`${config.buildRoot}/server/**/*.js`)
         .pipe(babel(babelConfig))
         .pipe(gulp.dest(`${config.deployRoot}/server`));
-    });
+    }));
     /**
      * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
      */
