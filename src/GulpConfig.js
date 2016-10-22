@@ -16,18 +16,16 @@ const path = require('path');
 const appRoot = require('app-root-path');
 const coveralls = require('gulp-coveralls');
 const gutil = require('gulp-util');
-//const webpack = require('gulp-webpack');
-//const webpack = require('webpack-stream');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const tsProject = ts.createProject(path.join(__dirname, '../tsconfig.json'));
 const nsp = require('gulp-nsp');
+const build = require('./tools/build');
 //const eslintConfig = require('./.eslintrc');
 //const install = require('gulp-install');
 //const colors = require('colors');
 //const Cache = require('gulp-file-cache');
 //const inject = require('gulp-inject');
-
 
 class GulpConfig {
   constructor(gulp) {
@@ -35,8 +33,8 @@ class GulpConfig {
     this.eslintConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.eslintrc')));
     this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
 
-    this.webpackDevConfig = require('../webpack.config.dev')({});
-    this.webpackProdConfig = require('../webpack.config.prod')({});
+    this.webpackDevConfig = require('../webpack/webpack.config.dev')({});
+    this.webpackProdConfig = require('../webpack/webpack.config.prod')({});
 
     this.tslintConfig = require('../tslint');
 
@@ -365,16 +363,19 @@ class GulpConfig {
     gulp.task(tasks.buildDist, gulp.series(tasks.cleanDist, tasks.buildLib, () => {
 
       //move non-script assets
-      gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.src|*.css|*.ejs)`)
+      gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.html|*.src|*.css|*.ejs)`)
         .pipe(gulp.dest(config.deployRoot));
 
       // run webpack
+      /*
       webpack(webpackProdConfig, function (err, stats) {
         if (err) throw new gutil.PluginError('webpack', err);
         gutil.log('[webpack]', stats.toString({
           // output options
         }));
       });
+      */
+      build(webpackProdConfig);
 
       //compile server
       return gulp.src(`${config.buildRoot}/server/**/*.js`)

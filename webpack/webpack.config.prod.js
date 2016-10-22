@@ -1,14 +1,14 @@
 const webpack = require('webpack');
-const path = require('path');
+//const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const modules = require('./webpack/modules');
+//const HtmlWebpackPlugin = require('html-webpack-plugin');
+const modules = require('./modules');
 
 const GLOBALS = {
     'process.env.NODE_ENV': JSON.stringify('production')
 };
 
-module.exports = function (config) {
+module.exports = (config) => {
 
     return {
         debug: true,
@@ -28,15 +28,9 @@ module.exports = function (config) {
         plugins: [
             new webpack.optimize.OccurenceOrderPlugin(),
             new webpack.DefinePlugin(GLOBALS),
-            new ExtractTextPlugin('styles.css'),
-            new webpack.optimize.DedupePlugin(), //dedupes bundles
-            new webpack.optimize.UglifyJsPlugin(),
-            new HtmlWebpackPlugin({
-                title: 'Ben Lugavere',
-                hash: true,
-                //template: './src/client/index.template.ejs',
-                inject: 'body'
-            }),
+            new ExtractTextPlugin('styles.[hash].css'),
+            new webpack.optimize.DedupePlugin(),
+            new webpack.optimize.UglifyJsPlugin()
         ]
     };
 };

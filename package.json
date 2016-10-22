@@ -57,6 +57,7 @@
     "babel-preset-react": "^6.11.1",
     "babel-preset-react-hmre": "^1.1.1",
     "babel-preset-stage-0": "^6.5.0",
+    "cheerio": "^0.22.0",
     "colors": "^1.1.2",
     "css-loader": "^0.23.1",
     "del": "^2.2.2",
@@ -95,7 +96,6 @@
     "webpack": "1.13.0",
     "webpack-dev-middleware": "1.6.1",
     "webpack-dev-server": "^1.16.2",
-    "webpack-hot-middleware": "2.10.0",
-    "webpack-stream": "^3.2.0"
+    "webpack-hot-middleware": "2.10.0"
   }
 }
