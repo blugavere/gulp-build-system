@@ -19,6 +19,7 @@ const gutil = require('gulp-util');
 //const webpack = require('gulp-webpack');
 //const webpack = require('webpack-stream');
 const webpack = require('webpack');
+const WebpackDevServer = require('webpack-dev-server');
 const tsProject = ts.createProject(path.join(__dirname, '../tsconfig.json'));
 const nsp = require('gulp-nsp');
 //const eslintConfig = require('./.eslintrc');
@@ -27,21 +28,24 @@ const nsp = require('gulp-nsp');
 //const Cache = require('gulp-file-cache');
 //const inject = require('gulp-inject');
 
+
 class GulpConfig {
   constructor(gulp) {
     this.gulp = gulp;
     this.eslintConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.eslintrc')));
     this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
-    this.webpackProdConfig = require('../webpack.config.prod')({}); //TODO: enable dynamic configs
+
+    this.webpackDevConfig = require('../webpack.config.dev')({});
+    this.webpackProdConfig = require('../webpack.config.prod')({});
 
     this.tslintConfig = require('../tslint');
 
     this.babel = this.babel.bind(this);
     this.setConfig = this.setConfig.bind(this);
-    
+
     this.defineTasks = this.defineTasks.bind(this);
     this.definePaths = this.definePaths.bind(this);
-    
+
     this.tslint = this.tslint.bind(this);
 
 
@@ -60,20 +64,26 @@ class GulpConfig {
       allTs: 'src/**/*.ts',
       allOther: 'src/**/!(*.js|*.ts|*.map|*.src)',
       libraryTypeScriptDefinitions: 'typings/**/*.d.ts',
-      
+
       sourceRoot: 'src',
       buildRoot: 'lib',
       deployRoot: 'dist',
 
       typings: './typings/',
       defs: 'release/definitions',
-      clientMain: '/client/index'
+      clientMain: '/client/index' //.ts
     };
 
   }
 
   definePaths() {
-    const { config, config: { buildRoot, sourceRoot } } = this;
+    const {
+      config,
+      config: {
+        buildRoot,
+        sourceRoot
+      }
+    } = this;
     this.config = Object.assign({}, this.config, {
       serverEntry: config.serverEntry || `${buildRoot}/server/app.js`,
       serverWatch: config.serverWatch || `${sourceRoot}/server/**`
@@ -100,7 +110,7 @@ class GulpConfig {
       otherTask: 'other', // move all non-ts and js files to lib,
       watchAll: 'watch',
 
-      buildLib: 'build', // build dev
+      buildLib: 'build:lib', // build dev
       buildDist: 'build:dist', // build for production
 
       startServer: 'dev:server', // start nodemon process
@@ -108,12 +118,12 @@ class GulpConfig {
       start: 'dev' // start client & server 
     };
 
-    if(prefix) {
-      for(let i in this.tasks) {
+    if (prefix) {
+      for (let i in this.tasks) {
         this.tasks[i] = `${prefix}${this.tasks[i]}`;
       }
     }
-    
+
     this.config.appRoot = appRoot.path;
   }
 
@@ -166,7 +176,7 @@ class GulpConfig {
     /**
      * do both
      */
-    gulp.task(tasks.tsTask, [tasks.tsLint, tasks.tsCompile]);
+    gulp.task(tasks.tsTask, gulp.series([tasks.tsLint, tasks.tsCompile]));
   }
 
   initJs() {
@@ -185,7 +195,7 @@ class GulpConfig {
     /**
      * Compile javascript through babel.
      */
-    gulp.task(tasks.jsTask, function () {
+    gulp.task(tasks.jsTask, () => {
       return gulp.src(config.allJs)
         .pipe(excludeGitignore())
         //.pipe(print())
@@ -204,11 +214,11 @@ class GulpConfig {
     /**
      * testing
      */
-    gulp.task('pre-test', function () {
+    gulp.task('pre-test', () => {
       return gulp.src([
-        `${config.buildRoot}/**/*.js`,
-        `!${config.buildRoot}/**/*.test.js`,
-      ])
+          `${config.buildRoot}/**/*.js`,
+          `!${config.buildRoot}/**/*.test.js`,
+        ])
         .pipe(excludeGitignore())
         .pipe(istanbul({
           includeUntested: true,
@@ -217,24 +227,24 @@ class GulpConfig {
         .pipe(istanbul.hookRequire());
     });
 
-    gulp.task('test', ['pre-test'], function (cb) {
-      var mochaErr;
+    gulp.task('test', gulp.series(['pre-test']), (cb) => {
+      let mochaErr;
 
       gulp.src(`${config.buildRoot}/**/*.test.js`)
         .pipe(plumber())
         .pipe(mocha({
           reporter: 'spec'
         }))
-        .on('error', function (err) {
+        .on('error', err => {
           mochaErr = err;
         })
         .pipe(istanbul.writeReports())
-        .on('end', function () {
+        .on('end', () => {
           cb(mochaErr);
         });
     });
 
-    gulp.task('coveralls', ['test'], function () {
+    gulp.task('coveralls', gulp.series(['test']), () => {
       if (!process.env.CI) {
         return;
       }
@@ -254,14 +264,14 @@ class GulpConfig {
      * deletes everything in the output path
      */
     gulp.task(tasks.cleanBuild, () => {
-      del.sync([`${config.buildRoot}/**`]);
+      return del([`${config.buildRoot}/**`]);
     });
 
     gulp.task(tasks.cleanDist, () => {
-      return del.sync([`${config.deployRoot}/**`]);
+      return del([`${config.deployRoot}/**`]);
     });
 
-    gulp.task(tasks.clean, [tasks.cleanBuild, tasks.cleanDist]);
+    gulp.task(tasks.clean, gulp.parallel(tasks.cleanBuild, tasks.cleanDist));
   }
 
   initialize() {
@@ -274,55 +284,16 @@ class GulpConfig {
       babelConfig,
       gulp,
       tasks,
+      webpackDevConfig,
       webpackProdConfig
     } = this;
 
-    console.log(tasks);
     this.initTs();
     this.initJs();
     this.initTest();
     this.initClean();
 
-    
-    /** 
-     * security
-     */
-    gulp.task('nsp', function (cb) {
-      nsp({
-        package: path.join(config.appRoot, 'package.json')
-      }, cb);
-    });
 
-    /**
-     * deployment
-     */
-    gulp.task(tasks.buildDist, [tasks.cleanDist, tasks.buildLib], function () {
-
-      //move non-script assets
-      gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.src|*.css|*.ejs)`)
-        .pipe(gulp.dest(config.deployRoot));
-
-      // run webpack
-      webpack(webpackProdConfig, function (err, stats) {
-        if (err) throw new gutil.PluginError('webpack', err);
-        gutil.log('[webpack]', stats.toString({
-          // output options
-        }));
-        //cb();
-      });
-
-      //compile server
-      return gulp.src(`${config.buildRoot}/server/**/*.js`)
-        .pipe(babel(babelConfig))
-        .pipe(gulp.dest(`${config.deployRoot}/server`));
-    });
-
-
-    /**
-     * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
-     */
-    gulp.task('prepublish', ['nsp', tasks.buildDist]);
-    gulp.task('default', [tasks.allCompile, 'test', 'coveralls']);
 
     /**
      * watch task
@@ -346,27 +317,78 @@ class GulpConfig {
     /**
      * compile all src code into lib
      */
-    gulp.task(tasks.allCompile, [tasks.tsTask, tasks.jsTask, tasks.otherTask]);
+    gulp.task(tasks.allCompile, gulp.parallel([tasks.tsTask, tasks.jsTask, tasks.otherTask]));
 
     /**
      * clean and then compile into lib
      */
-    gulp.task(tasks.buildLib, [tasks.clean, tasks.allCompile]);
+    gulp.task(tasks.buildLib, gulp.series([tasks.clean, tasks.allCompile]));
 
     /** 
      * clean all, compile, run, and watch server
      */
-    gulp.task(tasks.startServer, [tasks.clean, tasks.allCompile], () => { // 'start'
-      console.log('Start called.');
+    gulp.task(tasks.startServer, gulp.series(tasks.clean, tasks.allCompile, () => { // 'start'
       nodemon({
         script: config.serverEntry, // run ES5 code 
         watch: config.serverWatch, // watch server code 
         tasks: [tasks.allCompile] // compile synchronously onChange 
       });
+    }));
+
+     /** Start a webpack-dev-server, with hotreloading */
+    gulp.task(tasks.startClient, () => {
+      webpackDevConfig.entry.app.unshift('webpack-dev-server/client?http://localhost:8080/', 'webpack/hot/dev-server');
+      const compiler = webpack(webpackDevConfig);
+
+      new WebpackDevServer(compiler, {
+        hot: true
+      }).listen(8080, 'localhost', (err) => {
+        if (err) throw new gutil.PluginError('webpack-dev-server', err);
+        gutil.log('[webpack-dev-server]', 'http://localhost:8080/webpack-dev-server/index.html');
+      });
     });
 
-    gulp.task(tasks.start, [tasks.startServer]);
-    console.log('Gulp tasks registered successfully!'.bold.green);
+    gulp.task(tasks.start, gulp.parallel(tasks.startServer, tasks.startClient));
+
+    /** 
+     * security
+     */
+    gulp.task('nsp', cb => {
+      nsp({
+        package: path.join(config.appRoot, 'package.json')
+      }, cb);
+    });
+
+    /**
+     * deployment
+     */
+    gulp.task(tasks.buildDist, gulp.series([tasks.cleanDist, tasks.buildLib]), () => {
+
+      //move non-script assets
+      gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.src|*.css|*.ejs)`)
+        .pipe(gulp.dest(config.deployRoot));
+
+      // run webpack
+      webpack(webpackProdConfig, function (err, stats) {
+        if (err) throw new gutil.PluginError('webpack', err);
+        gutil.log('[webpack]', stats.toString({
+          // output options
+        }));
+        //cb();
+      });
+
+      //compile server
+      return gulp.src(`${config.buildRoot}/server/**/*.js`)
+        .pipe(babel(babelConfig))
+        .pipe(gulp.dest(`${config.deployRoot}/server`));
+    });
+    /**
+     * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
+     */
+    gulp.task('prepublish', gulp.series(['nsp', tasks.buildDist]));
+    gulp.task('default', gulp.series([tasks.allCompile, 'test', 'coveralls']));
+
+    //console.log('Gulp tasks registered successfully!'.bold.green);
   }
 
   setConfig(config) {

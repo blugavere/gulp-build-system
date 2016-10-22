@@ -24,8 +24,9 @@ module.exports = config => {
       app: ['./src/client/index']
     },
     output: {
-      publicPath: 'http://localhost:8080/assets/',
-      filename: 'bundle.js'
+      path: require('path').resolve('./'),
+      publicPath: 'http://localhost:8080/',
+      filename: 'bundle.js',
     },
     module: modules,
     plugins: [
