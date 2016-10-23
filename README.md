@@ -87,6 +87,7 @@ These come out of the box. Namespacing is available via configuration. From cli,
 * **dev**: start up dev server
 * **build:dist**: production build
 * **test**: run unit tests
+* **test:watch**: run unit tests - watching
 * **nsp**: check security vulnerabilities of deps
 * **prepublish**: check security, production build
 

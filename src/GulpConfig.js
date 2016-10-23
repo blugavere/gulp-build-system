@@ -119,7 +119,11 @@ class GulpConfig {
 
       startServer: 'dev:server', // start nodemon process
       startClient: 'dev:client',
-      start: 'dev' // start client & server 
+      start: 'dev', // start client & server 
+      coveralls: 'coveralls',
+      preTest: 'pre-test',
+      test: 'test',
+      testWatch: 'test:watch'
     };
 
     if (prefix) {
@@ -213,17 +217,20 @@ class GulpConfig {
   initTest() {
     const {
       config,
+      tasks,
       gulp
     } = this;
+
     /**
      * testing
      */
-    gulp.task('pre-test', () => {
+    gulp.task(tasks.preTest, () => {
+      const root = path.join(config.appRoot, `./${config.buildRoot}/**/*`);
       return gulp.src([
-          `${config.buildRoot}/**/*.js`,
-          `!${config.buildRoot}/**/*.test.js`,
+          `${root}.js`,
+          `!${root}.test.js`,
         ])
-        .pipe(excludeGitignore())
+        //.pipe(excludeGitignore())
         .pipe(istanbul({
           includeUntested: true,
           instrumenter: isparta.Instrumenter
@@ -231,7 +238,7 @@ class GulpConfig {
         .pipe(istanbul.hookRequire());
     });
 
-    gulp.task('test', gulp.series('pre-test', (cb) => {
+    gulp.task(tasks.test, gulp.series(tasks.tsTask, tasks.jsTask, tasks.preTest, (cb) => {
       let mochaErr;
 
       gulp.src(`${config.buildRoot}/**/*.test.js`)
@@ -247,8 +254,14 @@ class GulpConfig {
           cb(mochaErr);
         });
     }));
+    
+    gulp.task(tasks.testWatch, gulp.series(tasks.test, function watch() {
+      return gulp.watch([
+        `${config.sourceRoot}/**/*.test.js`
+      ], gulp.series(tasks.test));
+    }));
 
-    gulp.task('coveralls', gulp.series('test', () => {
+    gulp.task(tasks.coveralls, gulp.series(tasks.test, () => {
       if (!process.env.CI) {
         return;
       }
