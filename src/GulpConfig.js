@@ -68,7 +68,8 @@ class GulpConfig {
 
       typings: './typings/',
       defs: 'release/definitions',
-      clientMain: '/client/index.js'
+      clientMain: '/client/index.js',
+      serverMain: '/server/app'
     };
 
   }
@@ -83,11 +84,13 @@ class GulpConfig {
       }
     } = this;
     const clientEntry = config.clientEntry || path.join(appRoot, `./${sourceRoot}${config.clientMain}`);
+    const serverEntry = config.serverEntry || path.join(appRoot, `./${buildRoot}/server/app.js`);
+    const serverWatch = config.serverWatch || path.join(appRoot, `./${sourceRoot}/${path.dirname(config.serverMain)}`);
     this.config = Object.assign({}, this.config, {
       clientEntry,
       clientWatch: path.dirname(clientEntry),
-      serverEntry: config.serverEntry || `${buildRoot}/server/app.js`,
-      serverWatch: config.serverWatch || `${sourceRoot}/server/**`
+      serverEntry,
+      serverWatch
     });
   }
 
