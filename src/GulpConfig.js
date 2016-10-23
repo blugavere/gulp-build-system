@@ -13,7 +13,7 @@ const mocha = require('gulp-mocha');
 const istanbul = require('gulp-istanbul');
 const isparta = require('isparta');
 const path = require('path');
-const appRoot = require('app-root-dir');//require('app-root-path');
+const appRoot = require('app-root-dir'); //require('app-root-path');
 const coveralls = require('gulp-coveralls');
 const gutil = require('gulp-util');
 const webpack = require('webpack');
@@ -26,15 +26,14 @@ const build = require('./tools/build');
 //const colors = require('colors');
 //const Cache = require('gulp-file-cache');
 //const inject = require('gulp-inject');
+const webpackDev = require('../webpack/webpack.config.dev');
+const webpackProd = require('../webpack/webpack.config.prod');
 
 class GulpConfig {
   constructor(gulp) {
     this.gulp = gulp;
     this.eslintConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.eslintrc')));
     this.babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
-
-    this.webpackDevConfig = require('../webpack/webpack.config.dev')({});
-    this.webpackProdConfig = require('../webpack/webpack.config.prod')({});
 
     this.tslintConfig = require('../tslint');
 
@@ -83,8 +82,10 @@ class GulpConfig {
         sourceRoot
       }
     } = this;
+    const clientEntry = config.clientEntry || path.join(appRoot, `./${sourceRoot}${config.clientMain}`);
     this.config = Object.assign({}, this.config, {
-      clientEntry: config.clientEntry || path.join(appRoot, `./${sourceRoot}${config.clientMain}`),
+      clientEntry,
+      clientWatch: path.dirname(clientEntry),
       serverEntry: config.serverEntry || `${buildRoot}/server/app.js`,
       serverWatch: config.serverWatch || `${sourceRoot}/server/**`
     });
@@ -124,7 +125,7 @@ class GulpConfig {
       }
     }
 
-    this.config.appRoot = appRoot.get();//appRoot.path;
+    this.config.appRoot = appRoot.get(); //appRoot.path;
   }
 
 
@@ -284,9 +285,10 @@ class GulpConfig {
       //babelConfig,
       gulp,
       tasks,
-      webpackDevConfig,
-      webpackProdConfig
     } = this;
+
+    const webpackDevConfig = webpackDev(config);
+    const webpackProdConfig = webpackProd(config);
 
     this.initTs();
     this.initJs();

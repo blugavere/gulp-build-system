@@ -1,14 +1,15 @@
 const webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const modules = require('./modules');
+
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('development')
 };
 
-//var root_folder = path.resolve(__dirname, '..')
-module.exports = () => {
+module.exports = config => {
+  
+  const modules = require('./modules')(config);
 
   return {
     context: __dirname,

@@ -1,15 +1,12 @@
 const webpack = require('webpack');
-//const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-//const HtmlWebpackPlugin = require('html-webpack-plugin');
-const modules = require('./modules');
 
 const GLOBALS = {
     'process.env.NODE_ENV': JSON.stringify('production')
 };
 
-module.exports = () => {
-    
+module.exports = config => {
+    const modules = require('./modules')(config);
     return {
         debug: true,
         devtool: 'source-map',
@@ -22,7 +19,9 @@ module.exports = () => {
         target: 'web',
         output: {
             path: 'dist/client',
-            publicPath: 'dist/client',
+            //publicPath: 'dist/client',
+            publicPath: '/',
+            
             filename: 'bundle.[hash].js'
         },
         devServer: {
