@@ -10,14 +10,14 @@ See this link for more info. https://nodesecurity.io/advisories/118
 
 Install these by adding them to devDependencies in package.json and running $ npm i
 
-    "gulp": "^3.9.1",
+    "gulp": "github:gulpjs/gulp#4.0",
     "gulp-istanbul": "^1.1.1",
     "gulp-nodemon": "^2.2.1",
     "gulp-exclude-gitignore": "^1.0.0"
 
 ### TODOS ###
-* Implement file cache for faster compilation
-* Separate out server-build/watch process from client build/watch process so that server doesn't recompile on client changes (and visa versa)
+* Enable more configuration
+* Clean up dependencies not being used
 
 ### How do I get set up? ###
 
@@ -79,12 +79,18 @@ $ npm publish
 ```
 
 ## Commands
-These come out of the box. Namespacing is available via configuration.
-* **clean**: clears the lib folder
+These come out of the box. Namespacing is available via configuration. From cli, type: gulp [command]
+
+* **clean**: clears the lib and dist folder
+* **clean:lib**: clears the lib folder
 * **clean:dist**: clears the dist folder
+* **dev**: start up dev server
+* **build:dist**: production build
+* **test**: run unit tests
+* **nsp**: check security vulnerabilities of deps
+* **prepublish**: check security, production build
 
-
-## configuration
+## Configuration
 
 How to persionalize:
 
@@ -92,9 +98,9 @@ All configuration is done by using the provided setter API. Do not overwrite!
 
 ```js
 //setter api
-gulpConfig.config({
+gulpConfig.setConfig({
     key: value
-})
+});
 
 //In order to namespace:
 prefix //string - defines namespace for all gulpconfig.
