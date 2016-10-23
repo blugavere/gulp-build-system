@@ -13,7 +13,7 @@ const mocha = require('gulp-mocha');
 const istanbul = require('gulp-istanbul');
 const isparta = require('isparta');
 const path = require('path');
-const appRoot = require('app-root-path');
+const appRoot = require('app-root-dir');//require('app-root-path');
 const coveralls = require('gulp-coveralls');
 const gutil = require('gulp-util');
 const webpack = require('webpack');
@@ -69,7 +69,7 @@ class GulpConfig {
 
       typings: './typings/',
       defs: 'release/definitions',
-      clientMain: '/client/index' //.ts
+      clientMain: '/client/index.js'
     };
 
   }
@@ -78,11 +78,13 @@ class GulpConfig {
     const {
       config,
       config: {
+        appRoot,
         buildRoot,
         sourceRoot
       }
     } = this;
     this.config = Object.assign({}, this.config, {
+      clientEntry: config.clientEntry || path.join(appRoot, `./${sourceRoot}${config.clientMain}`),
       serverEntry: config.serverEntry || `${buildRoot}/server/app.js`,
       serverWatch: config.serverWatch || `${sourceRoot}/server/**`
     });
@@ -122,7 +124,7 @@ class GulpConfig {
       }
     }
 
-    this.config.appRoot = appRoot.path;
+    this.config.appRoot = appRoot.get();//appRoot.path;
   }
 
 
@@ -279,7 +281,7 @@ class GulpConfig {
 
     const {
       config,
-      babelConfig,
+      //babelConfig,
       gulp,
       tasks,
       webpackDevConfig,
@@ -333,9 +335,13 @@ class GulpConfig {
       });
     }));
 
-     /** Start a webpack-dev-server, with hotreloading */
+    /** Start a webpack-dev-server, with hotreloading */
     gulp.task(tasks.startClient, () => {
-      webpackDevConfig.entry.app.unshift('webpack-dev-server/client?http://localhost:8080/', 'webpack/hot/dev-server');
+      webpackDevConfig.entry.app.unshift(
+        'webpack-dev-server/client?http://localhost:8080/',
+        'webpack/hot/dev-server',
+        config.clientEntry
+      );
       const compiler = webpack(webpackDevConfig);
 
       new WebpackDevServer(compiler, {
@@ -362,9 +368,6 @@ class GulpConfig {
      */
     gulp.task(tasks.buildDist, gulp.series(tasks.cleanDist, tasks.buildLib, () => {
 
-      //move non-script assets
-      gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.html|*.src|*.css|*.ejs)`)
-        .pipe(gulp.dest(config.deployRoot));
 
       // run webpack
       /*
@@ -375,12 +378,21 @@ class GulpConfig {
         }));
       });
       */
+      webpackProdConfig.entry.app.unshift(
+        config.clientEntry
+      );
+
       build(webpackProdConfig);
+      //move non-script assets
+      return gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.html|*.src|*.css|*.ejs)`)
+        .pipe(gulp.dest(config.deployRoot));
 
       //compile server
-      return gulp.src(`${config.buildRoot}/server/**/*.js`)
-        .pipe(babel(babelConfig))
-        .pipe(gulp.dest(`${config.deployRoot}/server`));
+
+      //return gulp.src(`${config.buildRoot}/server/**/*.js`)
+      //.pipe(babel(babelConfig))
+      //.pipe(gulp.dest(`${config.deployRoot}/server`));
+
     }));
     /**
      * WARN: these is are defaults. if you want to have your own stuff, overwrite this.

@@ -8,7 +8,7 @@ const GLOBALS = {
 };
 
 //var root_folder = path.resolve(__dirname, '..')
-module.exports = config => {
+module.exports = () => {
 
   return {
     context: __dirname,
@@ -21,7 +21,9 @@ module.exports = config => {
       extensions: ['', '.webpack.js', '.web.js', '.ts', '.tsx', '.js', '.css', '.less', 'scss', '.jsx']
     },
     entry: {
-      app: ['./src/client/index']
+      app: [
+        //'../src/client/index'
+      ]
     },
     output: {
       path: require('path').resolve('./'),

@@ -8,13 +8,17 @@ const GLOBALS = {
     'process.env.NODE_ENV': JSON.stringify('production')
 };
 
-module.exports = (config) => {
-
+module.exports = () => {
+    
     return {
         debug: true,
         devtool: 'source-map',
         noInfo: false,
-        entry: './lib/client/index.js',
+        entry: {
+            app: [
+                //'./lib/client/index.js',
+            ]
+        },
         target: 'web',
         output: {
             path: 'dist/client',
@@ -30,7 +34,8 @@ module.exports = (config) => {
             new webpack.DefinePlugin(GLOBALS),
             new ExtractTextPlugin('styles.[hash].css'),
             new webpack.optimize.DedupePlugin(),
-            new webpack.optimize.UglifyJsPlugin()
+            new webpack.optimize.UglifyJsPlugin(),
+            new webpack.optimize.AggressiveMergingPlugin()
         ]
     };
 };

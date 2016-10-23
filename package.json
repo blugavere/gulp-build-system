@@ -43,6 +43,7 @@
     "gulp-nodemon": "^2.2.1"
   },
   "dependencies": {
+    "app-root-dir": "^1.0.2",
     "app-root-path": "^2.0.1",
     "babel-core": "^6.11.4",
     "babel-eslint": "^7.0.0",
