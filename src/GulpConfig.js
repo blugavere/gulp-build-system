@@ -102,7 +102,7 @@ class GulpConfig {
       cleanBuild: 'clean:build',
       cleanDist: 'clean:dist', //clear out the dist folder
 
-      //typescript
+      /** typescript */
       tsLint: 'ts-lint', //lint typescript
       tsCompile: 'ts-compile', //compile typescript
       tsTask: 'ts', // do both
