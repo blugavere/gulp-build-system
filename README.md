@@ -45,6 +45,8 @@ gulpConfig.config({ allJs: 'src/**/*.js', allTs: 'src/**/*.ts'});
 
 //add npm script --> "dev": "gulp dev"
 
+clientEntry: path.join(__dirname, './src/client/app.js')
+
 //run your code
 $ npm run dev
 
