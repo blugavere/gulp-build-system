@@ -8,8 +8,6 @@ import ClownCar = require('./ClownCar');
 const path = require('path');
 const car = new Car('blue');
 const clownCar = new ClownCar('red');
-require('colors');
-//console.log('hello main');
 
 routes();
 

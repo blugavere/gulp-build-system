@@ -5,8 +5,8 @@ const GLOBALS = {
     'process.env.NODE_ENV': JSON.stringify('production')
 };
 
-module.exports = config => {
-    const modules = require('./modules')(config);
+module.exports = (config, babelConfig) => {
+    const modules = require('./modules')(config, babelConfig);
     return {
         debug: true,
         devtool: 'source-map',

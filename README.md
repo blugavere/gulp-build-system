@@ -1,43 +1,24 @@
 # README #
 
 This is a pre-configured gulp setup for getting up and running quickly with either a new or existing typescript or es2017 node.js application (both are supported). 
-The intent of this repository is to either help quickly create a new application with a build process, or **install a build process** into an existing application with a simple NPM install and a few minor config changes, instead of having to write your own configs from scratch.
 
 This package has a ton of dependencies, but none of them will run in your production code.
 
-Due to a security vulnerability, temporarily we need you to install some dev dependencies on your own (and of course at your own risk)
-See this link for more info. https://nodesecurity.io/advisories/118
+Standalone, this package is designed to be imported into an existing application. If you are starting a new application,
+feel free to use the associated yeoman generator to scaffold a brand new web application for you, using this package.
 
-Install these by adding them to devDependencies in package.json and running $ npm i
-
-    "gulp": "github:gulpjs/gulp#4.0",
-    "gulp-istanbul": "^1.1.1",
-    "gulp-nodemon": "^2.2.1",
-    "gulp-exclude-gitignore": "^1.0.0"
-
-### TODOS ###
-* Enable more configuration
-* Clean up dependencies not being used
-
-### How do I get set up? ###
-
-```sh
-$ npm i
-$ typings i
-$ npm run dev
-```
+[`generator-gbs-starter`](https://github.com/blugavere/generator-gbs-starter)
 
 ### Installation ###
 
 ```js
 
-//please read above!
-
-$ npm i --save-dev gulp-build-config
+$ npm i --save-dev gulp@github:gulpjs/gulp#4.0 gulp-build-config
 
 ```
 
 ### Usage ###
+Create a gulpfile (gulpfile.js) and add the below code into it.
 
 ```js
 
@@ -46,7 +27,7 @@ const gulp = require('gulp');
 
 const GulpConfig = require('gulp-build-system');
 const gulpConfig = new GulpConfig(gulp);
-gulpConfig.initialize();
+gulpConfig.init();
 
 /**
 * assumption is that your code is in the below structure: 
@@ -110,6 +91,24 @@ prefix //string - defines namespace for all gulpconfig.
 
 * **file**: namespaces generated gulp tasks
 * **url**: The url loader works like the file loader, but can return a Data Url if the file is smaller 
+
+### Contributing ###
+
+```sh
+$ npm i
+$ typings i
+$ npm run dev
+```
+
+### TODOS ###
+* Enable more configuration
+* Clean up dependencies not being used
+* Enable disabling stuff
+* Server side build option
+* Enable disabling some features
+* Make more modular and pluggable
+* Keep up with evolving technologies
+* Build out sample app.
 
 ## Prior Art
 * [`react-slingshot`](https://github.com/coryhouse/react-slingshot) - Corey House

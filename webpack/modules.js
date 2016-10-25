@@ -1,11 +1,7 @@
-const path = require('path');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const fs = require('fs');
-const babelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../.babelrc')));
-babelConfig.presets = babelConfig.presets.map(x => `babel-preset-${x}`).map(require.resolve);
-babelConfig.plugins = babelConfig.plugins.map(x => `babel-plugin-${x}`).map(require.resolve);
 
-const modules = config => {
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+const modules = (config, babelConfig) => {
   return {
     loaders: [{
       test: /\.(js|jsx)$/,

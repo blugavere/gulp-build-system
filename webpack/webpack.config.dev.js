@@ -1,15 +1,15 @@
+
 const webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('development')
 };
 
-module.exports = config => {
+module.exports = (config, babelConfig) => {
   
-  const modules = require('./modules')(config);
+  const modules = require('./modules')(config, babelConfig);
 
   return {
     context: __dirname,
@@ -27,7 +27,7 @@ module.exports = config => {
       ]
     },
     output: {
-      path: require('path').resolve('./'),
+      path: path.resolve('./'),
       publicPath: 'http://localhost:8080/',
       filename: 'bundle.js',
     },

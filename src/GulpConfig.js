@@ -1,7 +1,7 @@
+
 const fs = require('fs');
 const del = require('del');
 const babel = require('gulp-babel');
-//const print = require('gulp-print');
 const eslint = require('gulp-eslint');
 const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
@@ -13,19 +13,15 @@ const mocha = require('gulp-mocha');
 const istanbul = require('gulp-istanbul');
 const isparta = require('isparta');
 const path = require('path');
-const appRoot = require('app-root-dir'); //require('app-root-path');
+const appRoot = require('app-root-dir');
 const coveralls = require('gulp-coveralls');
 const gutil = require('gulp-util');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const tsProject = ts.createProject(path.join(__dirname, '../tsconfig.json'));
 const nsp = require('gulp-nsp');
+
+const tsProject = ts.createProject(path.join(__dirname, '../tsconfig.json'));
 const build = require('./tools/build');
-//const eslintConfig = require('./.eslintrc');
-//const install = require('gulp-install');
-//const colors = require('colors');
-//const Cache = require('gulp-file-cache');
-//const inject = require('gulp-inject');
 const webpackDev = require('../webpack/webpack.config.dev');
 const webpackProd = require('../webpack/webpack.config.prod');
 
@@ -69,7 +65,8 @@ class GulpConfig {
       typings: './typings/',
       defs: 'release/definitions',
       clientMain: '/client/index.js',
-      serverMain: '/server/app'
+      serverMain: '/server/app',
+      nspEnabled: true
     };
 
   }
@@ -86,6 +83,7 @@ class GulpConfig {
     const clientEntry = config.clientEntry || path.join(appRoot, `./${sourceRoot}${config.clientMain}`);
     const serverEntry = config.serverEntry || path.join(appRoot, `./${buildRoot}/server/app.js`);
     const serverWatch = config.serverWatch || path.join(appRoot, `./${sourceRoot}/${path.dirname(config.serverMain)}`);
+
     this.config = Object.assign({}, this.config, {
       clientEntry,
       clientWatch: path.dirname(clientEntry),
@@ -101,7 +99,8 @@ class GulpConfig {
       clean: 'clean', //clear out the lib filter
       cleanBuild: 'clean:build',
       cleanDist: 'clean:dist', //clear out the dist folder
-
+      coveralls: 'coveralls',
+      
       /** typescript */
       tsLint: 'ts-lint', //lint typescript
       tsCompile: 'ts-compile', //compile typescript
@@ -117,10 +116,12 @@ class GulpConfig {
       buildLib: 'build:lib', // build dev
       buildDist: 'build:dist', // build for production
 
+      prepublish: 'prepublish',
+
       startServer: 'dev:server', // start nodemon process
       startClient: 'dev:client',
       start: 'dev', // start client & server 
-      coveralls: 'coveralls',
+      nsp:  'nsp',
       preTest: 'pre-test',
       test: 'test',
       testWatch: 'test:watch'
@@ -134,8 +135,6 @@ class GulpConfig {
 
     this.config.appRoot = appRoot.get(); //appRoot.path;
   }
-
-
 
   /** 
    * typescript tasks
@@ -206,7 +205,6 @@ class GulpConfig {
     gulp.task(tasks.jsTask, () => {
       return gulp.src(config.allJs)
         .pipe(excludeGitignore())
-        //.pipe(print())
         .pipe(eslint(eslintConfig))
         .pipe(eslint.format())
         .pipe(babel(babelConfig))
@@ -224,11 +222,11 @@ class GulpConfig {
     /**
      * testing
      */
+    const testRoot = path.join(config.appRoot, `./${config.buildRoot}/**/*`);
     gulp.task(tasks.preTest, () => {
-      const root = path.join(config.appRoot, `./${config.buildRoot}/**/*`);
       return gulp.src([
-          `${root}.js`,
-          `!${root}.test.js`,
+          `${testRoot}.js`,
+          `!${testRoot}.test.js`,
         ])
         //.pipe(excludeGitignore())
         .pipe(istanbul({
@@ -241,7 +239,7 @@ class GulpConfig {
     gulp.task(tasks.test, gulp.series(tasks.tsTask, tasks.jsTask, tasks.preTest, (cb) => {
       let mochaErr;
 
-      gulp.src(`${config.buildRoot}/**/*.test.js`)
+      gulp.src(`${testRoot}.js`)
         .pipe(plumber())
         .pipe(mocha({
           reporter: 'spec'
@@ -257,7 +255,7 @@ class GulpConfig {
     
     gulp.task(tasks.testWatch, gulp.series(tasks.test, function watch() {
       return gulp.watch([
-        `${config.sourceRoot}/**/*.test.js`
+        path.join(config.appRoot, `${config.sourceRoot}/**/*.test.js`)
       ], gulp.series(tasks.test));
     }));
 
@@ -298,13 +296,13 @@ class GulpConfig {
 
     const {
       config,
-      //babelConfig,
+      babelConfig,
       gulp,
       tasks,
     } = this;
 
-    const webpackDevConfig = webpackDev(config);
-    const webpackProdConfig = webpackProd(config);
+    const webpackDevConfig = webpackDev(config, babelConfig);
+    const webpackProdConfig = webpackProd(config, babelConfig);
 
     this.initTs();
     this.initJs();
@@ -375,7 +373,7 @@ class GulpConfig {
     /** 
      * security
      */
-    gulp.task('nsp', cb => {
+    gulp.task(tasks.nsp, cb => {
       nsp({
         package: path.join(config.appRoot, 'package.json')
       }, cb);
@@ -386,21 +384,12 @@ class GulpConfig {
      */
     gulp.task(tasks.buildDist, gulp.series(tasks.cleanDist, tasks.buildLib, () => {
 
-
-      // run webpack
-      /*
-      webpack(webpackProdConfig, function (err, stats) {
-        if (err) throw new gutil.PluginError('webpack', err);
-        gutil.log('[webpack]', stats.toString({
-          // output options
-        }));
-      });
-      */
       webpackProdConfig.entry.app.unshift(
         config.clientEntry
       );
 
       build(webpackProdConfig);
+
       //move non-script assets
       return gulp.src(`${config.buildRoot}/**/*!(*.js|*.jsx|*.ts|*.map|*.html|*.src|*.css|*.ejs)`)
         .pipe(gulp.dest(config.deployRoot));
@@ -412,13 +401,18 @@ class GulpConfig {
       //.pipe(gulp.dest(`${config.deployRoot}/server`));
 
     }));
+
     /**
      * WARN: these is are defaults. if you want to have your own stuff, overwrite this.
      */
-    gulp.task('prepublish', gulp.series(['nsp', tasks.buildDist]));
-    gulp.task('default', gulp.series([tasks.allCompile, 'test', 'coveralls']));
+    const prepub = [tasks.buildDist];
 
-    //console.log('Gulp tasks registered successfully!'.bold.green);
+    if(config.nspEnabled) {
+      prepub.unshift(tasks.nsp);
+    }
+
+    gulp.task(tasks.prepublish, gulp.series(prepub));
+    gulp.task('default', gulp.series([tasks.allCompile, tasks.test, tasks.coveralls]));
   }
 
   setConfig(config) {

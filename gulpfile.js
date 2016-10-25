@@ -7,4 +7,9 @@ const gulp = require('gulp');
 
 const GulpConfig = require('./src/gulpConfig');
 const gulpConfig = new GulpConfig(gulp);
+
+gulpConfig.setConfig({
+  nspEnabled: false
+});
+
 gulpConfig.initialize();
