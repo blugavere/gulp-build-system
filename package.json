@@ -34,7 +34,11 @@
   ],
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^6.0.45",
+    "@types/expect": "^1.13.30",
+    "@types/gulp": "^3.8.32",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.46",
+    "@types/superagent": "^2.0.35",
     "expect": "^1.20.2",
     "express": "^4.14.0",
     "gulp": "github:gulpjs/gulp#4.0"
