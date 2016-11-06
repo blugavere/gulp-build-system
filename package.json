@@ -30,7 +30,10 @@
     "nodemon.json",
     "tsconfig.json",
     "tslint.json",
-    "webpack.config.prod.js"
+    "README.md",
+    "webpack.config.js",
+    "webpack.config.prod.js",
+    "typings.json"
   ],
   "license": "ISC",
   "devDependencies": {

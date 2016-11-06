@@ -18,7 +18,6 @@ module.exports = {
       $('head').prepend(`<link rel="stylesheet" href="styles.${hash}.css">`);
       $('body').append(`<script src="bundle.${hash}.js"></script>`);
       
-      console.log('root', root, 'changed', root.replace('/src/', '/dist/'));
       fs.writeFile(`${outputPath}/index.html`, $.html(), 'utf8', err => {
         if (err) return console.log(err);
         console.log(chalk.bold(chalk.green(`index.html written to ${outputPath}`)));

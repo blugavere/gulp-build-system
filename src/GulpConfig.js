@@ -288,7 +288,10 @@ class GulpConfig {
      * deletes everything in the output path
      */
     gulp.task(tasks.cleanBuild, () => {
-      return del([`${config.buildRoot}/**`]);
+      return del([
+        `${config.buildRoot}/**`,
+        'coverage/**'
+      ]);
     });
 
     gulp.task(tasks.cleanDist, () => {

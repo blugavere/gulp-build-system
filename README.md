@@ -1,6 +1,6 @@
 # README #
 
-This is a pre-configured gulp setup for getting up and running quickly with either a new or existing typescript or es2017 node.js application (both are supported). 
+This is a pre-configured gulp setup for getting up and running quickly with either a new or existing typescript or ES2017 node.js application (both are supported). 
 
 This package has a bunch of dependencies but none of them will run in your production code.
 
@@ -74,6 +74,7 @@ These come out of the box. Namespacing is available via configuration. From cli,
 * **clean:lib**: clears the lib folder
 * **clean:dist**: clears the dist folder
 * **dev**: start up dev server
+* **build:lib**: development build
 * **build:dist**: production build
 * **test**: run unit tests
 * **test:watch**: run unit tests - watching
@@ -92,7 +93,7 @@ gulpConfig.setConfig({
     key: value
 });
 
-// Example:
+// example:
 gulpConfig.setConfig({
     clientEntry: './src/public/app.js',
     serverEntry: './src/server/app.js'
@@ -112,10 +113,8 @@ Have fun!
 * nspEnabled - whether or not to check your project dependencies for vulnerabilities before publishing
     * type: bool
 
-* **file**: namespaces generated gulp tasks
-* **url**: The url loader works like the file loader, but can return a Data Url if the file is smaller 
 
-### Contributing ###
+## Contributing
 
 ```sh
 $ npm i
@@ -123,9 +122,9 @@ $ typings i
 $ npm run dev
 ```
 
-### TODOS ###
+## TODOS
+Stuff you can help with.
 * Enable more configuration
-* Clean up dependencies not being used
 * Enable disabling stuff
 * Server side build option
 * Enable disabling some features
