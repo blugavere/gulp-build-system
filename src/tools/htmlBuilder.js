@@ -1,12 +1,13 @@
+
 const fs = require('fs');
 const cheerio = require('cheerio');
-require('colors');
+const chalk = require('chalk');
 
 /*eslint-disable no-console*/
 module.exports = {
-  build: (hash) => {
+  build: (root, outputPath, hash) => {
 
-    fs.readFile('src/client/index.html', 'utf8', (err, markup) => {
+    fs.readFile(`${root}/index.html`, 'utf8', (err, markup) => {
       if (err) return console.log(err);
 
       const $ = cheerio.load(markup);
@@ -17,13 +18,11 @@ module.exports = {
       $('head').prepend(`<link rel="stylesheet" href="styles.${hash}.css">`);
       $('body').append(`<script src="bundle.${hash}.js"></script>`);
       
-
-      fs.writeFile('dist/client/index.html', $.html(), 'utf8', err => {
+      console.log('root', root, 'changed', root.replace('/src/', '/dist/'));
+      fs.writeFile(`${outputPath}/index.html`, $.html(), 'utf8', err => {
         if (err) return console.log(err);
-        console.log('index.html written to /dist/client'.bold.green);
+        console.log(chalk.bold(chalk.green(`index.html written to ${outputPath}`)));
       });
-
     });
-
   }
 };

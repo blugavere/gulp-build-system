@@ -1,38 +1,43 @@
+
 'use strict';
+
 /*eslint-disable no-console*/
-require('colors');
+
 const webpack = require('webpack');
 const htmlBuilder = require('./htmlBuilder');
+const chalk = require('chalk');
+const path = require('path');
 
 const build = webpackConfig => {
   process.env.NODE_ENV = JSON.stringify('production');
-  //process.env.NODE_ENV = 'production';
-  console.log(`Generating minified bundle for ${process.env.NODE_ENV} via Webpack. This will take a moment.`.bold.green);
+  console.log(chalk.bold(chalk.green(`Generating minified bundle for ${process.env.NODE_ENV} via Webpack. This will take a moment.`)));
 
   webpack(webpackConfig).run((err, stats) => {
     if (err) {
-      console.log(err.bold.red);
+      console.log(chalk.bold(chalk.green(err)));
       return 1;
     }
 
     const jsonStats = stats.toJson();
 
     if (jsonStats.hasErrors) {
-      return jsonStats.errors.map(error => console.log(error.red));
+      return jsonStats.errors.map(error => console.log(chalk.red(error)));
     }
 
     if (jsonStats.hasWarnings) {
-      console.log('Webpack generated the following warnings: '.bold.yellow);
-      return jsonStats.warnings.map(warning => console.log(warning.yellow));
+      console.log(chalk.bold(chalk.yellow('Webpack generated the following warnings: ')));
+      return jsonStats.warnings.map(warning => console.log(chalk.yellow(warning)));
     }
 
-    console.log('building html with hash: ', stats.hash);
-
-    htmlBuilder.build(stats.hash);
+    //console.log('building html with hash: ', stats.hash);
+    const root = path.dirname(webpackConfig.entry.app[0]);
+    //console.log(chalk.bold(chalk.cyan(root)));
+    const outputPath = path.join(webpackConfig.context, webpackConfig.output.path);
+    htmlBuilder.build(root, outputPath, stats.hash);
 
     console.log(`Webpack stats: ${stats}`);
 
-    console.log('Your app has been compiled in prodction mode and written to /dist. It\'s ready to roll!'.green);
+    console.log(chalk.green('Your app has been compiled in prodction mode and written to /dist. It\'s ready to roll!'));
 
     return 0;
   });
