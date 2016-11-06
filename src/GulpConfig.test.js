@@ -4,9 +4,10 @@ const GulpConfig = require('./GulpConfig');
 
 describe('Gulp Build System', () => {
     let gulpConfig;
-    before(() => {
+    beforeEach(() => {
         gulpConfig = new GulpConfig(gulp);
     });
+
     it('should have unit tests', () => {
         expect(true).toBe(true);
     });
@@ -21,4 +22,34 @@ describe('Gulp Build System', () => {
         expect(typeof gulpConfig.setConfig).toBe('function');
     });
 
+    describe('definePaths', () => {
+        let clientRoot;
+        let serverRoot;
+        it('should determine application entry paths', () => {
+            gulpConfig.definePaths();
+            const config = gulpConfig.config;
+            clientRoot = config.clientWatch;
+            serverRoot = config.serverWatch;
+            expect(config.clientEntry).toExist();
+            expect(config.clientWatch).toExist();
+            expect(config.serverEntry).toExist();
+            expect(config.serverWatch).toExist();
+        });
+
+        it('should determine application entry paths', () => {
+            const { config } = gulpConfig;
+
+            gulpConfig.setConfig({
+                clientEntry: './src/public/app.js',
+                serverEntry: '/src/server/app.js'
+            });
+
+            gulpConfig.definePaths();
+            expect(config.clientEntry).toExist();
+            expect(config.clientWatch).toNotEqual(clientRoot);
+            expect(config.serverWatch).toNotEqual(serverRoot);
+
+        });
+
+    });
 });

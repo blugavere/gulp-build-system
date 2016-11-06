@@ -50,27 +50,25 @@ class GulpConfig {
 
     this.initialize = this.initialize.bind(this);
 
-
+    /** things you can edit */
     this.config = {
-      //prefix: '',
-      allJs: 'src/**/*.js',
-      allTs: 'src/**/*.ts',
-      allOther: 'src/**/!(*.js|*.ts|*.map|*.src)',
-      libraryTypeScriptDefinitions: 'typings/**/*.d.ts',
+      appRoot: appRoot.get(), // not this
+      libraryTypeScriptDefinitions: 'typings/**/*.d.ts', // nor this
+      typings: './typings/', // nor either of these two
+      defs: 'release/definitions',
 
       sourceRoot: 'src',
       buildRoot: 'lib',
       deployRoot: 'dist',
 
-      typings: './typings/',
-      defs: 'release/definitions',
-      clientMain: '/client/index.js',
-      serverMain: '/server/app',
+      clientEntry: 'src/client/index.js',
+      serverEntry: 'src/server/app.js',
       nspEnabled: true
     };
-
   }
-
+  /**
+   * things that you should not edit - these get generated based on the constructor configs.
+   */
   definePaths() {
     const {
       config,
@@ -80,15 +78,24 @@ class GulpConfig {
         sourceRoot
       }
     } = this;
-    const clientEntry = config.clientEntry || path.join(appRoot, `./${sourceRoot}${config.clientMain}`);
-    const serverEntry = config.serverEntry || path.join(appRoot, `./${buildRoot}/server/app.js`);
-    const serverWatch = config.serverWatch || path.join(appRoot, `./${sourceRoot}/${path.dirname(config.serverMain)}`);
 
+    /** client is built using webpack, so watch the source code */
+    const clientEntry = path.join(appRoot, `${config.clientEntry}`);
+
+    /** server is built using gulp, so run the output directory but watch the source */
+    const serverEntry = path.join(appRoot, config.serverEntry.replace(`/${sourceRoot}/`,`/${buildRoot}/`));
+    const serverWatch = path.join(appRoot, `.${path.dirname(config.serverEntry)}`);
+    const testRoot = path.join(config.appRoot, `${config.buildRoot}/**/*`);
     this.config = Object.assign({}, this.config, {
+      allJs: `${sourceRoot}/**/*.js`,
+      allTs: `${sourceRoot}/**/*.ts`,
+      allOther: `${sourceRoot}/**/!(*.js|*.ts|*.map|*.src)`,
       clientEntry,
       clientWatch: path.dirname(clientEntry),
       serverEntry,
-      serverWatch
+      serverWatch,
+      testRoot,
+      testGlob: `${testRoot}.test.js`
     });
   }
 
@@ -133,7 +140,6 @@ class GulpConfig {
       }
     }
 
-    this.config.appRoot = appRoot.get(); //appRoot.path;
   }
 
   /** 
@@ -215,6 +221,10 @@ class GulpConfig {
   initTest() {
     const {
       config,
+      config: {
+        testRoot,
+        testGlob
+      },
       tasks,
       gulp
     } = this;
@@ -222,11 +232,10 @@ class GulpConfig {
     /**
      * testing
      */
-    const testRoot = path.join(config.appRoot, `./${config.buildRoot}/**/*`);
     gulp.task(tasks.preTest, () => {
       return gulp.src([
           `${testRoot}.js`,
-          `!${testRoot}.test.js`,
+          `!${testGlob}`,
         ])
         //.pipe(excludeGitignore())
         .pipe(istanbul({
@@ -296,6 +305,9 @@ class GulpConfig {
 
     const {
       config,
+      config: {
+        clientEntry
+      },
       babelConfig,
       gulp,
       tasks,
@@ -321,14 +333,11 @@ class GulpConfig {
       gulp.watch(config.allOther, [tasks.allOther]);
     });
 
-
     gulp.task(tasks.otherTask, () => {
       return gulp.src(config.allOther)
         .pipe(excludeGitignore())
-        //.pipe(print())
         .pipe(gulp.dest(config.buildRoot));
     });
-
 
     /**
      * compile all src code into lib
@@ -385,9 +394,9 @@ class GulpConfig {
     gulp.task(tasks.buildDist, gulp.series(tasks.cleanDist, tasks.buildLib, () => {
 
       webpackProdConfig.entry.app.unshift(
-        config.clientEntry
+        clientEntry
       );
-
+      
       build(webpackProdConfig);
 
       //move non-script assets
