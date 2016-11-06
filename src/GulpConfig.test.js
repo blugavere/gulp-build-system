@@ -36,8 +36,8 @@ describe('Gulp Build System', () => {
             expect(config.serverWatch).toExist();
         });
 
-        it('should determine application entry paths', () => {
-            const { config } = gulpConfig;
+        it('should be able to change application entry paths', () => {
+            const config = gulpConfig.config;
 
             gulpConfig.setConfig({
                 clientEntry: './src/public/app.js',
@@ -45,6 +45,7 @@ describe('Gulp Build System', () => {
             });
 
             gulpConfig.definePaths();
+            
             expect(config.clientEntry).toExist();
             expect(config.clientWatch).toNotEqual(clientRoot);
             expect(config.serverWatch).toNotEqual(serverRoot);

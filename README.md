@@ -2,12 +2,32 @@
 
 This is a pre-configured gulp setup for getting up and running quickly with either a new or existing typescript or es2017 node.js application (both are supported). 
 
-This package has a ton of dependencies, but none of them will run in your production code.
+This package has a bunch of dependencies but none of them will run in your production code.
 
 Standalone, this package is designed to be imported into an existing application. If you are starting a new application,
 feel free to use the associated yeoman generator to scaffold a brand new web application for you, using this package.
 
 [`generator-gbs-starter`](https://github.com/blugavere/generator-gbs-starter)
+
+```
+An important assumption in using this tool is that is that your code already is 
+(or you're willing to make it) build-friendly, such as in a structure similar to below.
+  src/ <- where you house your source code, (typecsript, es7, etc - stuff that wont work in browser)
+    server/
+      app.js
+    client/
+  lib/ <- where your files get built to, so that you can run them in development
+  dist/ <- where built/minified files go for production deployment  
+  .gitignore (required)
+  .gulpfile.js
+  .package.json
+  ...etc
+
+The file paths above are configurable, however, we're also assuming there's a separation between client 
+and server code for your app. If you are looking for something isomorphic or universal, this probably isn't
+your best choice of build configuration.
+
+```
 
 ### Installation ###
 
@@ -29,34 +49,20 @@ const GulpConfig = require('gulp-build-system');
 const gulpConfig = new GulpConfig(gulp);
 gulpConfig.init();
 
-/**
-* assumption is that your code is in the below structure: 
-* src/
-*   server/
-*     app.js
-*   client/
-* .gitignore (required)
-* .gulpfile.js
-* .package.json
-* the below code is not required if you follow this convention.
-*/
+// end gulpfile.js
 
-gulpConfig.config({ allJs: 'src/**/*.js', allTs: 'src/**/*.ts'});
+// add npm script --> "dev": "gulp dev"
 
-//add npm script --> "dev": "gulp dev"
-
-clientEntry: path.join(__dirname, './src/client/app.js')
-
-//run your code
+// run your code
 $ npm run dev
 
-//test 
+// test 
 $ gulp test
 
-//test watch
+// test watch
 $ gulp watch
 
-//deploy to npm (be careful!)
+// deploy to npm (be careful!)
 $ npm publish
 
 ```
@@ -81,15 +87,30 @@ How to persionalize:
 All configuration is done by using the provided setter API. Do not overwrite!
 
 ```js
-//setter api
+// setter api
 gulpConfig.setConfig({
     key: value
 });
 
-//In order to namespace:
-prefix //string - defines namespace for all gulpconfig.
+// Example:
+gulpConfig.setConfig({
+    clientEntry: './src/public/app.js',
+    serverEntry: './src/server/app.js'
+});
+
 
 ```
+
+**Options**
+Have fun!
+* serverEntry - entry point for the server app. **Important:** this must be in the root of your server-side directory.
+    * type: string
+    * example: './src/server/app.js'
+* clientEntry - entry point for the client app. **Important:** this must be in the root of your client-side directory.
+    * type: string
+    * example: './src/client/app.js'
+* nspEnabled - whether or not to check your project dependencies for vulnerabilities before publishing
+    * type: bool
 
 * **file**: namespaces generated gulp tasks
 * **url**: The url loader works like the file loader, but can return a Data Url if the file is smaller 
