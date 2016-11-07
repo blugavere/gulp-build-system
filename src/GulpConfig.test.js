@@ -2,6 +2,9 @@ const expect = require('expect');
 const gulp = require('gulp');
 const GulpConfig = require('./GulpConfig');
 
+/**
+ * mocha src/GulpConfig.test.js --watch
+ */
 describe('Gulp Build System', () => {
     let gulpConfig;
     beforeEach(() => {
