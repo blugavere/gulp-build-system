@@ -250,7 +250,7 @@ class GulpConfig {
     gulp.task(tasks.test, gulp.series(tasks.tsTask, tasks.jsTask, tasks.preTest, (cb) => {
       let mochaErr;
 
-      gulp.src(`${testRoot}.js`)
+      gulp.src(config.testGlob)
         .pipe(plumber())
         .pipe(mocha({
           reporter: 'spec'
