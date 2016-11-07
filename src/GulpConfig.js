@@ -310,9 +310,6 @@ class GulpConfig {
 
     const {
       config,
-      config: {
-        clientEntry
-      },
       babelConfig,
       gulp,
       tasks,
