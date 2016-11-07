@@ -13,13 +13,13 @@ module.exports = (config, babelConfig) => {
         noInfo: false,
         entry: {
             app: [
+                config.clientEntry
                 //'./lib/client/index.js',
             ]
         },
         target: 'web',
         output: {
-            path: 'dist/client',
-            //publicPath: 'dist/client',
+            path: config.clientDistDir,//'dist/client',
             publicPath: '/',
             
             filename: 'bundle.[hash].js'

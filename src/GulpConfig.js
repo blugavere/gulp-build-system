@@ -86,6 +86,7 @@ class GulpConfig {
     const serverEntry = path.join(appRoot, config.serverEntry.replace(`/${sourceRoot}/`,`/${buildRoot}/`));
     const serverWatch = path.join(appRoot, `.${path.dirname(config.serverEntry)}`);
     const testRoot = path.join(config.appRoot, `${config.buildRoot}/**/*`);
+    const clientBase = path.basename(path.dirname(this.config.clientEntry));
     this.config = Object.assign({}, this.config, {
       allJs: `${sourceRoot}/**/*.js`,
       allTs: `${sourceRoot}/**/*.ts`,
@@ -95,7 +96,8 @@ class GulpConfig {
       serverEntry,
       serverWatch,
       testRoot,
-      testGlob: `${testRoot}.test.js`
+      testGlob: `${testRoot}.test.js`,
+      clientDistDir: `${config.deployRoot}/${clientBase}`
     });
   }
 
@@ -395,11 +397,12 @@ class GulpConfig {
      * deployment
      */
     gulp.task(tasks.buildDist, gulp.series(tasks.cleanDist, tasks.buildLib, () => {
-
+      // deprecated
+      /*
       webpackProdConfig.entry.app.unshift(
         clientEntry
       );
-      
+      */
       build(webpackProdConfig);
 
       //move non-script assets
