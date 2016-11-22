@@ -12,4 +12,4 @@ gulpConfig.setConfig({
   nspEnabled: false
 });
 
-gulpConfig.initialize();
+gulpConfig.init();

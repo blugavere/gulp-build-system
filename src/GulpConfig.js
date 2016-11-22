@@ -323,8 +323,6 @@ class GulpConfig {
     this.initTest();
     this.initClean();
 
-
-
     /**
      * watch task
      */

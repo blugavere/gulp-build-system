@@ -12,12 +12,13 @@ feel free to use the associated yeoman generator to scaffold a brand new web app
 ```
 An important assumption in using this tool is that is that your code already is 
 (or you're willing to make it) build-friendly, such as in a structure similar to below.
-  src/ <- where you house your source code, (typecsript, es7, etc - stuff that wont work in browser)
+  src/ <- where you house your source code, (typescript, ES7, etc - code that may not run in all browsers)
     server/
-      app.js
+        app.js
     client/
-  lib/ <- where your files get built to, so that you can run them in development
-  dist/ <- where built/minified files go for production deployment  
+        index.js
+  lib/ <- where your files get built to, so that you can run them in a development environment
+  dist/ <- where built / minified files are generated for production deployment  
   .gitignore (required)
   .gulpfile.js
   .package.json

@@ -37,6 +37,7 @@
   ],
   "license": "ISC",
   "devDependencies": {
+    "@types/chalk": "^0.4.31",
     "@types/cheerio": "^0.17.31",
     "@types/del": "^2.2.31",
     "@types/expect": "^1.13.30",
@@ -44,14 +45,14 @@
     "@types/gulp": "^3.8.32",
     "@types/mocha": "^2.2.32",
     "@types/node": "^6.0.46",
+    "@types/sinon": "^1.16.32",
     "@types/superagent": "^2.0.35",
     "@types/webpack": "^1.12.35",
+    "clarify": "^2.0.0",
     "expect": "^1.20.2",
     "express": "^4.14.0",
-    "gulp": "github:gulpjs/gulp#4.0"
-  },
-  "peerDependencies": {
-    "gulp": "github:gulpjs/gulp#4.0"
+    "gulp": "github:gulpjs/gulp#4.0",
+    "sinon": "^1.17.6"
   },
   "dependencies": {
     "app-root-dir": "^1.0.2",
