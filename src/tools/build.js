@@ -29,9 +29,7 @@ const build = webpackConfig => {
       return jsonStats.warnings.map(warning => console.log(chalk.yellow(warning)));
     }
 
-    //console.log('building html with hash: ', stats.hash);
     const root = path.dirname(webpackConfig.entry.app[0]);
-    //console.log(chalk.bold(chalk.cyan(root)));
     const outputPath = path.join(webpackConfig.context, webpackConfig.output.path);
     htmlBuilder.build(root, outputPath, stats.hash);
 
